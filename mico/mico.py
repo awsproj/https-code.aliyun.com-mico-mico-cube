@@ -945,7 +945,7 @@ class Repo(object):
 
     @property
     def lib(self):
-        return self.path + '.' + ('bld' if self.is_build else 'lib')
+        return self.path + '.' + ('bld' if self.is_build else 'mib')
 
     @property
     def fullurl(self):
@@ -1866,11 +1866,11 @@ def deploy(ignore=False, depth=None, protocol=None, top=True):
             import_(lib.fullurl, lib.path, ignore=ignore, depth=depth, protocol=protocol, top=False)
             repo.ignore(relpath(repo.path, lib.path))
 
-    if top:
-        program = Program(repo.path)
-        program.post_action()
-        if program.is_classic:
-            program.update_tools('.temp')
+#    if top:
+#        program = Program(repo.path)
+#        program.post_action()
+#        if program.is_classic:
+#            program.update_tools('.temp')
 
 # Publish command
 @subcommand('publish',
@@ -2027,12 +2027,12 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
             with cd(lib.path):
                 update(lib.rev, clean=clean, clean_files=clean_files, clean_deps=clean_deps, ignore=ignore, top=False)
 
-    if top:
-        program = Program(repo.path)
-        program.set_root()
-        program.post_action()
-        if program.is_classic:
-            program.update_tools('.temp')
+#    if top:
+#        program = Program(repo.path)
+#        program.set_root()
+#        program.post_action()
+#        if program.is_classic:
+#            program.update_tools('.temp')
 
 
 # Synch command
@@ -2137,7 +2137,7 @@ def status_(ignore=False):
             with cd(lib.path):
                 status_(ignore)
 
-
+'''
 # Compile command which invokes the mico OS native build system
 @subcommand('compile',
     dict(name=['-t', '--toolchain'], help='Compile toolchain. Example: ARM, GCC_ARM, IAR'),
@@ -2419,7 +2419,7 @@ def detect():
         if targets:
             for target in targets:
                 action("Detected \"%s\" connected to \"%s\" and using com port \"%s\"" % (target['name'], target['mount'], target['serial']))
-
+'''
 
 # Generic config command
 @subcommand('config',
@@ -2494,7 +2494,7 @@ def config_(var=None, value=None, global_cfg=False, unset=False, list_config=Fal
     else:
         subcommands['config'].error("too few arguments")
 
-
+'''
 # Build system and exporters
 @subcommand('target',
     dict(name='name', nargs='?', help='Default target name. Example: K64F, NUCLEO_F401RE, NRF51822...'),
@@ -2521,7 +2521,7 @@ def toolchain_(name=None, global_cfg=False, supported=False):
     if supported:
         return compile_(supported=supported)
     return config_('toolchain', name, global_cfg=global_cfg)
-
+'''
 @subcommand('help',
     help='This help screen')
 def help_():
