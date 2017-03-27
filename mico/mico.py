@@ -847,7 +847,7 @@ class Repo(object):
         return repo
 
     @classmethod
-    def fromlib(cls, lib=None):
+    def fromlib(cls, lib=None, suffix='.component'):
         with open(lib) as f:
             ref = f.read(200)
 
@@ -856,13 +856,13 @@ class Repo(object):
         m_bld_url = re.match(regex_build_url, ref.strip().replace('\\', '/'))
         if not (m_local or m_bld_url or m_repo_url):
             warning(
-                "File \"%s\" in \"%s\" uses a non-standard .lib file extension, which is not compatible with the mico build tools.\n" % (os.path.basename(lib), os.path.split(lib)[0]))
+                "File \"%s\" in \"%s\" uses a non-standard .comp or .codes file extension, which is not compatible with the mico build tools.\n" % (os.path.basename(lib), os.path.split(lib)[0]))
             return False
         else:
-            return cls.fromurl(ref, lib[:-4])
+            return cls.fromurl(ref, lib[:-len(suffix)])
 
     @classmethod
-    def fromrepo(cls, path=None):
+    def fromrepo(cls, path=None, option_codes=False):
         repo = cls()
         if path is None:
             path = Repo.findparent(os.getcwd())
@@ -879,7 +879,7 @@ class Repo(object):
             loc = cache_cfg if (cache_cfg and cache_cfg != 'on' and cache_cfg != 'enabled') else None
             repo.cache = loc or os.path.join(tempfile.gettempdir(), 'mico-repo-cache')
 
-        repo.sync()
+        repo.sync(option_codes=option_codes)
 
         if repo.scm is None:
             warning(
@@ -945,7 +945,10 @@ class Repo(object):
 
     @property
     def lib(self):
-        return self.path + '.' + ('bld' if self.is_build else 'mib')
+    	if os.path.isfile(os.path.join(self.path, self.name) + self.name + '.mk') or self.name =='mico-os':
+        	return self.path + '.' + ('bld' if self.is_build else 'component')
+        else:
+        	return self.path + '.codes'
 
     @property
     def fullurl(self):
@@ -955,7 +958,7 @@ class Repo(object):
                         self.rev if self.rev else '') +
                         (self.opt if self.opt else ''))
 
-    def sync(self):
+    def sync(self, option_codes=False):
         self.url = None
         self.rev = None
         if os.path.isdir(self.path):
@@ -981,7 +984,10 @@ class Repo(object):
                 pass
 
             try:
-                self.libs = list(self.getlibs())
+            	self.libs = []
+                self.libs += list(self.getlibs())
+                if option_codes:
+                	self.libs += list(self.getcodes())
             except ProcessException:
                 pass
 
@@ -1070,12 +1076,25 @@ class Repo(object):
             files[:] = [f for f in files if not f.startswith('.')]
 
             for f in files:
-                if f.endswith('.mib'):
-                    repo = Repo.fromlib(os.path.join(root, f))
+                if f.endswith('.component'):
+                    repo = Repo.fromlib(os.path.join(root, f), '.component')
                     if repo:
                         yield repo
-                    if f[:-4] in dirs:
-                        dirs.remove(f[:-4])
+                    if f[:-10] in dirs:
+                        dirs.remove(f[:-10])
+
+    def getcodes(self):
+        for root, dirs, files in os.walk(self.path):
+            dirs[:] = [d for d in dirs  if not d.startswith('.')]
+            files[:] = [f for f in files if not f.startswith('.')]
+
+            for f in files:
+                if f.endswith('.codes'):
+                    repo = Repo.fromlib(os.path.join(root, f), '.codes')
+                    if repo:
+                        yield repo
+                    if f[:-6] in dirs:
+                        dirs.remove(f[:-6])
 
     def write(self):
         if os.path.isfile(self.lib):
@@ -1722,10 +1741,7 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
         url = mico_base_url+'/'+url+'.git'
 
     repo = Repo.fromurl(url, path)
-    private = False
-    if repo.opt:
-        if '@private' in repo.opt:
-            private = True
+
     if top:
         p = Program(path)
         if p and not p.is_cwd:
@@ -1755,12 +1771,11 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
                     else:
                         error(err, e[0])
     else:
-        if not private:
-            err = "Unable to clone repository (%s)" % url
-            if ignore:
-                warning(err)
-            else:
-                error(err, 1)
+        err = "Unable to clone repository (%s)" % url
+        if ignore:
+            warning(err)
+        else:
+            error(err, 1)
                 
     if os.path.isdir(repo.path):
         repo.sync()
@@ -1848,13 +1863,37 @@ def remove(path):
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
-    help='Find and add missing libraries',
+    help='Find and add missing components and source codes',
     description=(
         "Import missing dependencies in an existing program or library.\n"
         "Use 'mico import <URL>' and 'mico add <URL>' instead of cloning manually and\n"
         "then running 'mico deploy'"))
 def deploy(ignore=False, depth=None, protocol=None, top=True):
     repo = Repo.fromrepo()
+    repo.ignores()
+
+    for lib in repo.libs:
+        if os.path.isdir(lib.path):
+            if lib.check_repo():
+                with cd(lib.path):
+                    update(lib.rev, ignore=ignore, depth=depth, protocol=protocol, top=False)
+        else:
+            import_(lib.fullurl, lib.path, ignore=ignore, depth=depth, protocol=protocol, top=False)
+            repo.ignore(relpath(repo.path, lib.path))
+
+
+# Deploy command
+@subcommand('deploy2',
+    dict(name=['-C', '--codes'], action='store_true', help='Clone or update optional source codes repos, defined by .codes file. Add -I if not have repo permission'),
+    dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
+    dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
+    help='Find and add missing components and source codes',
+    description=(
+        "Import missing dependencies in an existing program or library.\n"
+        "Use 'mico import <URL>' and 'mico add <URL>' instead of cloning manually and\n"
+        "then running 'mico deploy'"))
+def deploy2(ignore=True, codes=False, depth=None, protocol=None, top=True):
+    repo = Repo.fromrepo(option_codes=codes)
     repo.ignores()
 
     for lib in repo.libs:
@@ -2037,9 +2076,9 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
 
 # Synch command
 @subcommand('sync',
-    help='Synchronize library references',
+    help='Synchronize mico component references',
     description=(
-        "Synchronizes all library and dependency references (.lib files) in the\n"
+        "Synchronizes all component and dependency references (.component files) in the\n"
         "current program or library.\n"
         "Note that this will remove all invalid library references."))
 def sync(recursive=True, keep_refs=False, top=True):
