@@ -807,6 +807,7 @@ class Repo(object):
     rev = None
     scm = None
     libs = []
+    codes = []
     cache = None
 
     @classmethod
@@ -858,6 +859,21 @@ class Repo(object):
             return False
         else:
             return cls.fromurl(ref, lib[:lib.rfind('.')])
+
+    @classmethod
+    def fromcode(cls, code=None):
+        with open(code) as f:
+            ref = f.read(200)
+
+        m_local = re.match(regex_local_ref, ref.strip().replace('\\', '/'))
+        m_repo_url = re.match(regex_url_ref, ref.strip().replace('\\', '/'))
+        m_bld_url = re.match(regex_build_url, ref.strip().replace('\\', '/'))
+        if not (m_local or m_bld_url or m_repo_url):
+            warning(
+                "File \"%s\" in \"%s\" uses a non-standard .lib file extension, which is not compatible with the mico build tools.\n" % (os.path.basename(code), os.path.split(code)[0]))
+            return False
+        else:
+            return cls.fromurl(ref, code[:code.rfind('.')])
 
     @classmethod
     def fromrepo(cls, path=None):
@@ -946,6 +962,10 @@ class Repo(object):
         return self.path + '.' + ('bld' if self.is_build else 'component')
 
     @property
+    def code(self):
+        return self.path + '.' + ('bld' if self.is_build else 'codes')
+
+    @property
     def fullurl(self):
         if self.url:
             return (self.url.rstrip('/') + '/' +
@@ -979,6 +999,11 @@ class Repo(object):
 
             try:
                 self.libs = list(self.getlibs())
+            except ProcessException:
+                pass
+
+            try:
+                self.codes = list(self.getcodes())
             except ProcessException:
                 pass
 
@@ -1071,8 +1096,22 @@ class Repo(object):
                     repo = Repo.fromlib(os.path.join(root, f))
                     if repo:
                         yield repo
-                    if f[:-4] in dirs:
-                        dirs.remove(f[:-4])
+                    if f[:f.rfind('.')] in dirs:
+                        dirs.remove(f[:f.rfind('.')])
+
+    def getcodes(self):
+        for root, dirs, files in os.walk(self.path):
+            dirs[:] = [d for d in dirs  if not d.startswith('.')]
+            files[:] = [f for f in files if not f.startswith('.')]
+
+            for f in files:
+                if f.endswith('.codes'):
+                    repo = Repo.fromcode(os.path.join(root, f))
+                    if repo:
+                        yield repo
+                    if f[:f.rfind('.')] in dirs:
+                        dirs.remove(f[:f.rfind('.')])
+
 
     def write(self):
         if os.path.isfile(self.lib):
@@ -1090,6 +1129,24 @@ class Repo(object):
                 self.rev if self.rev else ''))
         action("Updating reference \"%s\" -> \"%s\"" % (relpath(cwd_root, self.path) if cwd_root != self.path else self.name, ref))
         with open(self.lib, 'wb') as f:
+            f.write(ref + '\n')
+
+    def write_codes(self):
+        if os.path.isfile(self.code):
+            with open(self.code) as f:
+                lib_repo = Repo.fromurl(f.read().strip())
+                if (formaturl(lib_repo.url, 'ssh') == formaturl(self.url, 'ssh') # match URLs in common format (ssh)
+                        and (lib_repo.rev == self.rev                              # match revs, even if rev is None (valid for repos with no revisions)
+                             or (lib_repo.rev and self.rev
+                                 and lib_repo.rev == self.rev[0:len(lib_repo.rev)]))):  # match long and short rev formats
+                    #print self.name, 'unmodified'
+                    return
+
+        ref = (formaturl(self.url, 'ssh').rstrip('/') + '/' +
+              (('' if self.is_build else '#') +
+                self.rev if self.rev else ''))
+        action("Updating reference \"%s\" -> \"%s\"" % (relpath(cwd_root, self.path) if cwd_root != self.path else self.name, ref))
+        with open(self.code, 'wb') as f:
             f.write(ref + '\n')
 
     def rm_untracked(self):
@@ -1863,6 +1920,29 @@ def deploy(ignore=False, depth=None, protocol=None, top=True):
 #        if program.is_classic:
 #            program.update_tools('.temp')
 
+# Source command
+@subcommand('source',
+    dict(name='name', help='Destination name'),
+    dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
+    dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
+    dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
+    help='Find and add missing libraries',
+    description=(
+        "Import missing dependencies in an existing program or library.\n"
+        "Use 'mico import <URL>' and 'mico add <URL>' instead of cloning manually and\n"
+        "then running 'mico deploy'"))
+def source(name, ignore=False, depth=None, protocol=None, top=True):
+    repo = Repo.fromcode(os.path.join(os.getcwd(), name+'.codes'))
+
+    if os.path.isdir(repo.path):
+        if repo.check_repo():
+            with cd(repo.path):
+                update(repo.rev, ignore=ignore, depth=depth, protocol=protocol, top=False)
+    else:
+        import_(repo.fullurl, repo.path, ignore=ignore, depth=depth, protocol=protocol, top=False)
+        repo.ignore(relpath(repo.path, repo.path))
+            
+
 # Publish command
 @subcommand('publish',
     dict(name=['-A', '--all'], dest='all_refs', action='store_true', help='Publish all branches, including new ones. Default: push only the current branch.'),
@@ -2053,6 +2133,14 @@ def sync(recursive=True, keep_refs=False, top=True):
                 repo.remove(lib.lib)
                 repo.unignore(relpath(repo.path, lib.path))
 
+    for code in repo.codes:
+        if os.path.isdir(code.path):
+            code.check_repo()
+            code.sync()
+            code.write_codes()
+            repo.ignore(relpath(repo.path, code.path))
+            progress()
+
     for root, dirs, files in os.walk(repo.path):
         dirs[:] = [d for d in dirs  if not d.startswith('.')]
         files[:] = [f for f in files if not f.startswith('.')]
@@ -2062,7 +2150,7 @@ def sync(recursive=True, keep_refs=False, top=True):
                 continue
 
             lib = Repo.fromrepo(os.path.join(root, d))
-            if os.path.isfile(lib.lib):
+            if os.path.isfile(lib.lib) or os.path.isfile(lib.code):
                 dirs.remove(d)
                 continue
 
