@@ -2421,6 +2421,34 @@ def detect():
                 action("Detected \"%s\" connected to \"%s\" and using com port \"%s\"" % (target['name'], target['mount'], target['serial']))
 '''
 
+# Make command
+@subcommand('make',
+    help='Make mico program/library\n\n',
+    description=(
+        "Make mico program/library."))
+def make():
+    # Get the make arguments
+    make_args = ' '.join(sys.argv[2:])
+    print 'make',make_args
+
+    # Find the MiCoder directory
+    builtin_micoder = os.path.join(Program().path,'mico-os/MiCoder')
+    micoder_dir = Program().get_cfg('MICODER') or Global().get_cfg('MICODER') or \
+    (builtin_micoder if os.path.isdir(builtin_micoder) else None)
+    if not micoder_dir:
+        error('Can not find MiCoder!')
+
+    # Decide which make to use according to the platform system 
+    win_make = os.path.join(micoder_dir,'cmd/Win32/make.exe')
+    make_cmd = 'make' if (sys.platform == 'darwin' or sys.platform == 'linux') else (win_make if sys.platform == 'win32' else None)
+    if not make_cmd:
+        error('Unsupported system!')
+
+    # Run make command
+    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
+    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, make_args])
+    os.system(make_cmd_str)
+    
 # Generic config command
 @subcommand('config',
     dict(name='var', nargs='?', help='Variable name. E.g. "target", "toolchain", "protocol"'),
