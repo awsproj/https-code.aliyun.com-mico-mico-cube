@@ -59,7 +59,7 @@ ignores = [
 # reference to local (unpublished) repo - dir#rev
 regex_local_ref = r'^([\w.+-][\w./+-]*?)/?(?:#(.*))?$'
 # reference to repo - url#rev
-regex_url_ref = r'^(.*/([\w.+-]+)(?:\.\w+)?)/?(?:#(.*?)(@.+?)?)?$'
+regex_url_ref = r'^(.*/([\w.+-]+)(?:\.\w+)?)/?(?:#(.*?)?)?$'
 
 # git url (no #rev)
 regex_git_url = r'^(git\://|ssh\://|https?\://|)(([^/:@]+)(\:([^/:@]+))?@)?([^/:]+)[:/](.+?)(\.git|\/?)$'
@@ -805,7 +805,6 @@ class Repo(object):
     path = None
     url = None
     rev = None
-    opt = None
     scm = None
     libs = []
     cache = None
@@ -833,7 +832,6 @@ class Repo(object):
             repo.path = os.path.abspath(path or os.path.join(os.getcwd(), repo.name))
             repo.url = formaturl(m_repo_url.group(1))
             repo.rev = m_repo_url.group(3)
-            repo.opt = m_repo_url.group(4)
             if repo.rev and repo.rev != 'latest' and not re.match(r'^([a-fA-F0-9]{6,40})$', repo.rev):
                 error('Invalid revision (%s)' % repo.rev, -1)
         else:
@@ -859,7 +857,7 @@ class Repo(object):
                 "File \"%s\" in \"%s\" uses a non-standard .lib file extension, which is not compatible with the mico build tools.\n" % (os.path.basename(lib), os.path.split(lib)[0]))
             return False
         else:
-            return cls.fromurl(ref, lib[:-4])
+            return cls.fromurl(ref, lib[:lib.rfind('.')])
 
     @classmethod
     def fromrepo(cls, path=None):
@@ -945,15 +943,14 @@ class Repo(object):
 
     @property
     def lib(self):
-        return self.path + '.' + ('bld' if self.is_build else 'mib')
+        return self.path + '.' + ('bld' if self.is_build else 'component')
 
     @property
     def fullurl(self):
         if self.url:
             return (self.url.rstrip('/') + '/' +
                     (('' if self.is_build else '#') +
-                        self.rev if self.rev else '') +
-                        (self.opt if self.opt else ''))
+                        self.rev if self.rev else ''))
 
     def sync(self):
         self.url = None
@@ -1070,7 +1067,7 @@ class Repo(object):
             files[:] = [f for f in files if not f.startswith('.')]
 
             for f in files:
-                if f.endswith('.mib'):
+                if f.endswith('.component'):
                     repo = Repo.fromlib(os.path.join(root, f))
                     if repo:
                         yield repo
@@ -1541,7 +1538,7 @@ def formaturl(url, format="default"):
             elif format == "http":
                 url = 'http://%s%s/%s' % (m.group(2) if (m.group(2) and (m.group(5) or m.group(3) != 'git')) else '', m.group(6), m.group(7))
             elif format == "https":
-                url = 'https://%s%s/%s' % (m.group(2) if (m.group(2) and (m.group(5) or m.group(3) != 'git')) else '', m.group(6), m.group(7))
+                url = 'https://%s%s/%s%s' % (m.group(2) if (m.group(2) and (m.group(5) or m.group(3) != 'git')) else '', m.group(6), m.group(7), m.group(8))
         else:
             m = re.match(regex_hg_url, url)
             if m:
@@ -1722,10 +1719,6 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
         url = mico_base_url+'/'+url+'.git'
 
     repo = Repo.fromurl(url, path)
-    private = False
-    if repo.opt:
-        if '@private' in repo.opt:
-            private = True
     if top:
         p = Program(path)
         if p and not p.is_cwd:
@@ -1746,21 +1739,19 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
                 if repo.rev and repo.getrev() != repo.rev:
                     repo.checkout(repo.rev, True)
             except ProcessException as e:
-                if not private:
-                    err = "Unable to update \"%s\" to %s" % (repo.name, repo.revtype(repo.rev, True))
-                    if depth:
-                        err = err + ("\nThe --depth option might prevent fetching the whole revision tree and checking out %s." % (repo.revtype(repo.rev, True)))
-                    if ignore:
-                        warning(err)
-                    else:
-                        error(err, e[0])
+                err = "Unable to update \"%s\" to %s" % (repo.name, repo.revtype(repo.rev, True))
+                if depth:
+                    err = err + ("\nThe --depth option might prevent fetching the whole revision tree and checking out %s." % (repo.revtype(repo.rev, True)))
+                if ignore:
+                    warning(err)
+                else:
+                    error(err, e[0])
     else:
-        if not private:
-            err = "Unable to clone repository (%s)" % url
-            if ignore:
-                warning(err)
-            else:
-                error(err, 1)
+        err = "Unable to clone repository (%s)" % url
+        if ignore:
+            warning(err)
+        else:
+            error(err, 1)
                 
     if os.path.isdir(repo.path):
         repo.sync()
