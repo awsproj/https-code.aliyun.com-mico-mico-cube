@@ -1868,6 +1868,15 @@ def add(url, path=None, ignore=False, depth=None, protocol=None, top=True):
     lib.write()
     repo.add(lib.lib)
 
+    mk_comp_str = '$(NAME)_COMPONENTS += '+lib.name
+    prog_mk_file = os.path.join(Program().path,Program().name+'.mk')
+    with open(prog_mk_file) as f:
+        content = f.read()
+        if not mk_comp_str in content:
+            content += '\r\n'+mk_comp_str+'\r\n'
+    with open(prog_mk_file, 'w') as f:
+        f.write(content)
+
 #    if top:
 #        Program(repo.path).post_action()
 
