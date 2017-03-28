@@ -855,7 +855,7 @@ class Repo(object):
         m_bld_url = re.match(regex_build_url, ref.strip().replace('\\', '/'))
         if not (m_local or m_bld_url or m_repo_url):
             warning(
-                "File \"%s\" in \"%s\" uses a non-standard .lib file extension, which is not compatible with the mico build tools.\n" % (os.path.basename(lib), os.path.split(lib)[0]))
+                "File \"%s\" in \"%s\" uses a non-standard .comp or .codes file extension, which is not compatible with the mico build tools.\n" % (os.path.basename(lib), os.path.split(lib)[0]))
             return False
         else:
             return cls.fromurl(ref, lib[:lib.rfind('.')])
@@ -1896,7 +1896,7 @@ def remove(path):
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
-    help='Find and add missing libraries',
+    help='Find and add missing components and source codes',
     description=(
         "Import missing dependencies in an existing program or library.\n"
         "Use 'mico import <URL>' and 'mico add <URL>' instead of cloning manually and\n"
@@ -2108,9 +2108,9 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
 
 # Synch command
 @subcommand('sync',
-    help='Synchronize library references',
+    help='Synchronize mico component references',
     description=(
-        "Synchronizes all library and dependency references (.lib files) in the\n"
+        "Synchronizes all component and dependency references (.component files) in the\n"
         "current program or library.\n"
         "Note that this will remove all invalid library references."))
 def sync(recursive=True, keep_refs=False, top=True):
