@@ -1660,6 +1660,7 @@ def subcommand(name, *args, **kwargs):
     dict(name='--scm', nargs='?', help='Source control management. Currently supported: %s. Default: git' % ', '.join([s.name for s in scms.values()])),
     dict(name='--program', action='store_true', help='Force creation of an mico program. Default: auto.'),
     dict(name='--library', action='store_true', help='Force creation of an mico library. Default: auto.'),
+    dict(name='--component', action='store_true', help='Force creation of an mico component. Default: false.'),
     dict(name='--micolib', action='store_true', help='Add the mico library instead of mico-os into the program.'),
     dict(name='--create-only', action='store_true', help='Only create a program, do not import mico-os or mico library.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch the mico OS repository when creating new program. Default: all revisions.'),
@@ -1670,7 +1671,7 @@ def subcommand(name, *args, **kwargs):
         "Alternatively creates an mico library if executed within an existing program.\n"
         "When creating new program, the latest mico-os release will be downloaded/added\n unless --create-only is specified.\n"
         "Supported source control management: git, hg"))
-def new(name, scm='git', program=False, library=False, micolib=False, create_only=False, depth=None, protocol=None):
+def new(name, scm='git', program=False, library=False, component=False, micolib=False, create_only=False, depth=None, protocol=None):
     global cwd_root
 
     d_path = os.path.abspath(name or os.getcwd())
@@ -1738,20 +1739,22 @@ def new(name, scm='git', program=False, library=False, micolib=False, create_onl
 
 
     Repo.fromrepo().ignores()
-    
-    shutil.copy(os.path.join(Program().path, 'mico-os/template/mico_config.h'), os.path.join(Program().path, 'mico_config.h'))
-    shutil.copy(os.path.join(Program().path, 'mico-os/template/README.md'), os.path.join(Program().path, 'README.md'))
 
-    content = None
-    with open(os.path.join(Program().path, 'mico-os/template/template.c'), 'r') as f:
-    	content = f.read()
-    with open(os.path.join(Program().path, Program().name+'.c'), 'w') as f:
-        f.write(content.replace('template', Program().name))
-
-    with open(os.path.join(Program().path, 'mico-os/template/template.mk'), 'r') as f:
-    	content = f.read()
-    with open(os.path.join(Program().path, Program().name+'.mk'), 'w') as f:
-        f.write(content.replace('template', Program().name))
+    if d_type == 'program':
+        prog_dir = Program().path
+        prog_name = Program().name
+        prog_file_list = ('main.c', 'mico_config.h', 'README.md', 'template.mk') if not component else \
+        ('template.c', 'template.h', 'README.md', 'template.mk', 'test/README.md', 'test/main.c', 'test/mico_config.h', 'test/test.mk')
+        temp_prog_dir = os.path.join(Program().path, 'mico-os/template/'+('program' if not component else 'component'))
+        if component:
+            os.mkdir(os.path.join(Program().path, 'test'))
+        for file in prog_file_list:
+            with open(os.path.join(temp_prog_dir, file), 'r') as f:
+                content = f.read()
+            file_name = file.replace('template', prog_name)
+            file_content = content.replace('template', prog_name)
+            with open(os.path.join(prog_dir, file_name), 'w') as f:
+                f.write(file_content)
     
 #    Program(d_path).post_action()
 
@@ -1821,8 +1824,6 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
             if tools_root:
                 with open(os.path.join(cwd_root, tools_root_file), 'w') as f:
                     f.write('TOOLS_ROOT='+tools_root)
-            shutil.copy(os.path.join(cwd_root, 'mico-os', 'make'), os.path.join(cwd_root, 'make'))
-            shutil.copy(os.path.join(cwd_root, 'mico-os', 'make.exe'), os.path.join(cwd_root, 'make.exe'))
             shutil.copy(os.path.join(cwd_root, 'mico-os', 'Makefile'), os.path.join(cwd_root, 'Makefile'))
             if sys.platform == 'win32':
                 eclipse_subdir = 'Win32'
@@ -1868,14 +1869,15 @@ def add(url, path=None, ignore=False, depth=None, protocol=None, top=True):
     lib.write()
     repo.add(lib.lib)
 
-    mk_comp_str = '$(NAME)_COMPONENTS += '+lib.name
-    prog_mk_file = os.path.join(Program().path,Program().name+'.mk')
-    with open(prog_mk_file) as f:
-        content = f.read()
-        if not mk_comp_str in content:
-            content += '\r\n'+mk_comp_str+'\r\n'
-    with open(prog_mk_file, 'w') as f:
-        f.write(content)
+    if not lib.name == 'mico-os':
+        mk_comp_str = '$(NAME)_COMPONENTS += '+lib.name
+        prog_mk_file = os.path.join(Program().path,Program().name+'.mk')
+        with open(prog_mk_file) as f:
+            content = f.read()
+            if not mk_comp_str in content:
+                content += '\r\n'+mk_comp_str+'\r\n'
+        with open(prog_mk_file, 'w') as f:
+            f.write(content)
 
 #    if top:
 #        Program(repo.path).post_action()
