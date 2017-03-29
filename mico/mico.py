@@ -1660,7 +1660,6 @@ def subcommand(name, *args, **kwargs):
     dict(name='--scm', nargs='?', help='Source control management. Currently supported: %s. Default: git' % ', '.join([s.name for s in scms.values()])),
     dict(name='--program', action='store_true', help='Force creation of an mico program. Default: auto.'),
     dict(name='--library', action='store_true', help='Force creation of an mico library. Default: auto.'),
-    dict(name='--component', action='store_true', help='Force creation of an mico component. Default: false.'),
     dict(name='--micolib', action='store_true', help='Add the mico library instead of mico-os into the program.'),
     dict(name='--create-only', action='store_true', help='Only create a program, do not import mico-os or mico library.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch the mico OS repository when creating new program. Default: all revisions.'),
@@ -1671,7 +1670,7 @@ def subcommand(name, *args, **kwargs):
         "Alternatively creates an mico library if executed within an existing program.\n"
         "When creating new program, the latest mico-os release will be downloaded/added\n unless --create-only is specified.\n"
         "Supported source control management: git, hg"))
-def new(name, scm='git', program=False, library=False, component=False, micolib=False, create_only=False, depth=None, protocol=None):
+def new(name, scm='git', program=False, library=False, micolib=False, create_only=False, depth=None, protocol=None):
     global cwd_root
 
     d_path = os.path.abspath(name or os.getcwd())
@@ -1741,13 +1740,11 @@ def new(name, scm='git', program=False, library=False, component=False, micolib=
     Repo.fromrepo().ignores()
 
     if d_type == 'program':
-        prog_dir = Program().path
+        prog_dir = os.path.join(Program().path, Program().name)
+        os.mkdir(prog_dir)
         prog_name = Program().name
-        prog_file_list = ('main.c', 'mico_config.h', 'README.md', 'template.mk') if not component else \
-        ('template.c', 'template.h', 'README.md', 'template.mk', 'test/README.md', 'test/main.c', 'test/mico_config.h', 'test/test.mk')
-        temp_prog_dir = os.path.join(Program().path, 'mico-os/template/'+('program' if not component else 'component'))
-        if component:
-            os.mkdir(os.path.join(Program().path, 'test'))
+        prog_file_list = ('main.c', 'mico_config.h', 'README.md', 'template.mk')
+        temp_prog_dir = os.path.join(Program().path, 'mico-os/template/program')
         for file in prog_file_list:
             with open(os.path.join(temp_prog_dir, file), 'r') as f:
                 content = f.read()
