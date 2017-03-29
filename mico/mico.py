@@ -1878,13 +1878,14 @@ def add(url, path=None, ignore=False, depth=None, protocol=None, top=True):
 
     if not lib.name == 'mico-os':
         mk_comp_str = '$(NAME)_COMPONENTS += '+lib.name
-        prog_mk_file = os.path.join(Program().path,Program().name+'.mk')
-        with open(prog_mk_file) as f:
+        prog_mk_file = os.path.join(Program().path, Program().name, Program().name+'.mk')
+        with open(prog_mk_file, 'r+') as f:
             content = f.read()
+            f.seek(0)
             if not mk_comp_str in content:
                 content += '\r\n'+mk_comp_str+'\r\n'
-        with open(prog_mk_file, 'w') as f:
             f.write(content)
+        Repo.fromrepo(Program().path).add(prog_mk_file)
 
 #    if top:
 #        Program(repo.path).post_action()
