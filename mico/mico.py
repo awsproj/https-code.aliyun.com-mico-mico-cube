@@ -1736,7 +1736,6 @@ def new(name, scm='git', program=False, library=False, micolib=False, create_onl
         with cd(p_path):
             sync()
 
-
     Repo.fromrepo().ignores()
 
     if d_type == 'program':
@@ -1750,8 +1749,10 @@ def new(name, scm='git', program=False, library=False, micolib=False, create_onl
                 content = f.read()
             file_name = file.replace('template', prog_name)
             file_content = content.replace('template', prog_name)
-            with open(os.path.join(prog_dir, file_name), 'w') as f:
+            file_path = os.path.join(prog_dir, file_name)
+            with open(file_path, 'w') as f:
                 f.write(file_content)
+            Repo.fromrepo().add(file_path)
     
 #    Program(d_path).post_action()
 
