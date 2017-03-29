@@ -1738,21 +1738,30 @@ def new(name, scm='git', program=False, library=False, micolib=False, create_onl
 
     Repo.fromrepo().ignores()
 
+    # Copy template files
     if d_type == 'program':
-        prog_dir = os.path.join(Program().path, Program().name)
-        os.mkdir(prog_dir)
-        prog_name = Program().name
-        prog_file_list = ('main.c', 'mico_config.h', 'README.md', 'template.mk')
-        temp_prog_dir = os.path.join(Program().path, 'mico-os/template/program')
-        for file in prog_file_list:
-            with open(os.path.join(temp_prog_dir, file), 'r') as f:
-                content = f.read()
-            file_name = file.replace('template', prog_name)
-            file_content = content.replace('template', prog_name)
-            file_path = os.path.join(prog_dir, file_name)
-            with open(file_path, 'w') as f:
-                f.write(file_content)
-            Repo.fromrepo().add(file_path)
+        target_dir = os.path.join(d_path, name) 
+        os.mkdir(target_dir)
+        target_name = name
+        target_file_list = ('main.c', 'mico_config.h', 'README.md', 'template.mk')
+        temp_dir = os.path.join(d_path, 'mico-os/template/program')
+    else:
+        target_dir = d_path
+        os.mkdir(os.path.join(d_path, 'test'))
+        target_name = name
+        target_file_list = ('template.c', 'template.h', 'README.md', 'template.mk', 'test/README.md', 'test/main.c', 'test/mico_config.h', 'test/test.mk')
+        temp_dir = os.path.join(p_path, 'mico-os/template/component')
+        os.chdir(d_path)
+
+    for file in target_file_list:
+        with open(os.path.join(temp_dir, file), 'r') as f:
+            content = f.read()
+        target_file_name = file.replace('template', target_name)
+        target_file_content = content.replace('template', target_name)
+        target_file_path = os.path.join(target_dir, target_file_name)
+        with open(target_file_path, 'w') as f:
+            f.write(target_file_content)
+        Repo.fromrepo().add(target_file_path)
     
 #    Program(d_path).post_action()
 
