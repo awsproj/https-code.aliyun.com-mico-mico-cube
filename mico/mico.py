@@ -1740,10 +1740,10 @@ def new(name, scm='git', program=False, component=False, micolib=False, create_o
 
     # Copy template files
     if d_type == 'program':
-        target_dir = os.path.join(d_path, name) 
-        os.mkdir(target_dir)
+        target_dir = d_path
+        os.mkdir(os.path.join(d_path, name))
         target_name = name
-        target_file_list = ('main.c', 'mico_config.h', 'README.md', 'template.mk')
+        target_file_list = ('template/main.c', 'template/mico_config.h', 'README.md', 'template/template.mk')
         temp_dir = os.path.join(d_path, 'mico-os/template/program')
     else:
         target_dir = d_path
