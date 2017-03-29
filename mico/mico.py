@@ -75,9 +75,9 @@ regex_build_url = r'^(https?://([\w\-\.]*mico\.(co\.uk|org|com))/(users|teams)/(
 mico_base_url = 'https://code.aliyun.com/mico'
 # default MiCO OS url
 mico_os_url = 'https://code.aliyun.com/mico/mico-os.git'
-# default mico library url
+# default mico component url
 mico_lib_url = 'https://mico.org/users/mico_official/code/mico/builds/'
-# mico SDK tools needed for programs based on mico SDK library
+# mico SDK tools needed for programs based on mico SDK component
 mico_sdk_tools_url = 'https://mico.org/users/mico_official/code/mico-sdk-tools'
 
 # verbose logging
@@ -1659,37 +1659,37 @@ def subcommand(name, *args, **kwargs):
     dict(name='name', help='Destination name or path'),
     dict(name='--scm', nargs='?', help='Source control management. Currently supported: %s. Default: git' % ', '.join([s.name for s in scms.values()])),
     dict(name='--program', action='store_true', help='Force creation of an mico program. Default: auto.'),
-    dict(name='--library', action='store_true', help='Force creation of an mico library. Default: auto.'),
-    dict(name='--micolib', action='store_true', help='Add the mico library instead of mico-os into the program.'),
-    dict(name='--create-only', action='store_true', help='Only create a program, do not import mico-os or mico library.'),
+    dict(name='--component', action='store_true', help='Force creation of an mico component. Default: auto.'),
+    dict(name='--micolib', action='store_true', help='Add the mico component instead of mico-os into the program.'),
+    dict(name='--create-only', action='store_true', help='Only create a program, do not import mico-os or mico component.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch the mico OS repository when creating new program. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol when fetching the mico OS repository when creating new program. Supported: https, http, ssh, git. Default: inferred from URL.'),
-    help='Create new mico program or library',
+    help='Create new mico program or component',
     description=(
         "Creates a new mico program if executed within a non-program location.\n"
-        "Alternatively creates an mico library if executed within an existing program.\n"
+        "Alternatively creates an mico component if executed within an existing program.\n"
         "When creating new program, the latest mico-os release will be downloaded/added\n unless --create-only is specified.\n"
         "Supported source control management: git, hg"))
-def new(name, scm='git', program=False, library=False, micolib=False, create_only=False, depth=None, protocol=None):
+def new(name, scm='git', program=False, component=False, micolib=False, create_only=False, depth=None, protocol=None):
     global cwd_root
 
     d_path = os.path.abspath(name or os.getcwd())
     p_path = os.path.dirname(d_path)
-    if program and library:
-        error("Cannot use both --program and --library options.", 1)
-    elif program or library:
-        d_type = 'library' if library else 'program'
+    if program and component:
+        error("Cannot use both --program and --component options.", 1)
+    elif program or component:
+        d_type = 'component' if component else 'program'
     else:
         pp = Program(p_path)
         pd = Program(d_path)
         if pp.path == pd.path:
-            d_type = 'library' if os.path.abspath(p_path) != os.path.abspath(d_path) else 'program'
+            d_type = 'component' if os.path.abspath(p_path) != os.path.abspath(d_path) else 'program'
         else:
-            d_type = 'library' if not pp.is_cwd and os.path.abspath(p_path) != os.path.abspath(d_path) else 'program'
+            d_type = 'component' if not pp.is_cwd and os.path.abspath(p_path) != os.path.abspath(d_path) else 'program'
 
     if os.path.exists(d_path):
         p = Program(d_path)
-        if (d_type == 'program' and not p.is_cwd) or (d_type == 'library' and Repo.isrepo(d_path)):
+        if (d_type == 'program' and not p.is_cwd) or (d_type == 'component' and Repo.isrepo(d_path)):
             error("A %s with name \"%s\" already exists." % (d_type, os.path.basename(d_path)), 1)
 
     if scm and scm != 'none':
@@ -1777,7 +1777,7 @@ def new(name, scm='git', program=False, library=False, micolib=False, create_onl
     description=(
         "Imports mico program and its dependencies from a source control based URL\n"
         "(GitHub, Bitbucket, mico.org) into the current directory or specified\npath.\n"
-        "Use 'mico add <URL>' to add a library into an existing program."))
+        "Use 'mico add <URL>' to add a component into an existing program."))
 def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
     global cwd_root
 
@@ -1790,14 +1790,14 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
         p = Program(path)
         if p and not p.is_cwd:
             error("Cannot import program in the specified location \"%s\" because it's already part of a program \"%s\".\n"
-                  "Please change your working directory to a different location or use \"mico add\" to import the URL as a library." % (os.path.abspath(repo.path), p.name), 1)
+                  "Please change your working directory to a different location or use \"mico add\" to import the URL as a component." % (os.path.abspath(repo.path), p.name), 1)
 
     protocol = Program().get_cfg('PROTOCOL', protocol)
 
     if os.path.isdir(repo.path) and len(os.listdir(repo.path)) > 1:
         error("Directory \"%s\" is not empty. Please ensure that the destination folder is empty." % repo.path, 1)
 
-    text = "Importing program" if top else "Adding library"
+    text = "Importing program" if top else "Adding component"
     action("%s \"%s\" from \"%s\"%s" % (text, relpath(cwd_root, repo.path), formaturl(repo.url, protocol), ' at '+(repo.revtype(repo.rev, True))))
     if repo.clone(repo.url, repo.path, rev=repo.rev, depth=depth, protocol=protocol):
         with cd(repo.path):
@@ -1853,16 +1853,16 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
 #        Program(repo.path).post_action()
 
 
-# Add library command
+# Add component command
 @subcommand('add',
-    dict(name='url', help='URL of the library'),
+    dict(name='url', help='URL of the component'),
     dict(name='path', nargs='?', help='Destination name or path. Default: current folder.'),
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
-    help='Add library from URL',
+    help='Add component from URL',
     description=(
-        "Adds mico library and its dependencies from a source control based URL\n"
+        "Adds mico component and its dependencies from a source control based URL\n"
         "(GitHub, Bitbucket, mico.org) into an existing program.\n"
         "Use 'mico import <URL>' to import as a program"))
 def add(url, path=None, ignore=False, depth=None, protocol=None, top=True):
@@ -1890,20 +1890,20 @@ def add(url, path=None, ignore=False, depth=None, protocol=None, top=True):
 #        Program(repo.path).post_action()
 
 
-# Remove library
+# Remove component
 @subcommand('remove',
-    dict(name='path', help='Local library name or path'),
-    help='Remove library',
+    dict(name='path', help='Local component name or path'),
+    help='Remove component',
     description=(
-        "Remove specified library, its dependencies and references from the current\n"
-        "You can re-add the library from it's URL via 'mico add <library URL>'."))
+        "Remove specified component, its dependencies and references from the current\n"
+        "You can re-add the component from it's URL via 'mico add <component URL>'."))
 def remove(path):
     repo = Repo.fromrepo()
     if not Repo.isrepo(path):
-        error("Could not find library in path (%s)" % path, 1)
+        error("Could not find component in path (%s)" % path, 1)
 
     lib = Repo.fromrepo(path)
-    action("Removing library \"%s\" in \"%s\"" % (lib.name, lib.path))
+    action("Removing component \"%s\" in \"%s\"" % (lib.name, lib.path))
     rmtree_readonly(lib.path)
     repo.remove(lib.lib)
     repo.unignore(relpath(repo.path, lib.path))
@@ -1916,7 +1916,7 @@ def remove(path):
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
     help='Find and add missing components and source codes',
     description=(
-        "Import missing dependencies in an existing program or library.\n"
+        "Import missing dependencies in an existing program or component.\n"
         "Use 'mico import <URL>' and 'mico add <URL>' instead of cloning manually and\n"
         "then running 'mico deploy'"))
 def deploy(ignore=False, depth=None, protocol=None, top=True):
@@ -1940,15 +1940,13 @@ def deploy(ignore=False, depth=None, protocol=None, top=True):
 
 # Source command
 @subcommand('source',
-    dict(name='name', help='Destination name'),
+    dict(name='name', help='Destination library name without suffix'),
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
-    help='Find and add missing libraries',
+    help='Get the source code of one library',
     description=(
-        "Import missing dependencies in an existing program or library.\n"
-        "Use 'mico import <URL>' and 'mico add <URL>' instead of cloning manually and\n"
-        "then running 'mico deploy'"))
+        "Get the source code of one library"))
 def source(name, ignore=False, depth=None, protocol=None, top=True):
     repo = Repo.fromcode(os.path.join(os.getcwd(), name+'.codes'))
 
@@ -1965,9 +1963,9 @@ def source(name, ignore=False, depth=None, protocol=None, top=True):
 @subcommand('publish',
     dict(name=['-A', '--all'], dest='all_refs', action='store_true', help='Publish all branches, including new ones. Default: push only the current branch.'),
     dict(name=['-M', '--message'], dest='msg', type=str, nargs='?', help='Commit message. Default: prompts for commit message.'),
-    help='Publish program or library',
+    help='Publish program or component',
     description=(
-        "Publishes the current program or library and all dependencies to their\nassociated remote repository URLs.\n"
+        "Publishes the current program or component and all dependencies to their\nassociated remote repository URLs.\n"
         "This command performs various consistency checks for local uncommitted changes\n"
         "and unpublished revisions and encourages to commit/push them.\n"
         "Online guide about collaboration is available at:\n"
@@ -1980,7 +1978,7 @@ def publish(all_refs=None, msg=None, top=True):
     if repo.is_local:
         error(
             "%s \"%s\" in \"%s\" is a local repository.\nPlease associate it with a remote repository URL before attempting to publish.\n"
-            "Read more about publishing local repositories here:\nhttps://code.aliyun.com/mico/mico-cli/#publishing-local-program-or-library" % ("Program" if top else "Library", repo.name, repo.path, repo.scm.name), 1)
+            "Read more about publishing local repositories here:\nhttps://code.aliyun.com/mico/mico-cli/#publishing-local-program-or-component" % ("Program" if top else "Library", repo.name, repo.path, repo.scm.name), 1)
 
     for lib in repo.libs:
         if lib.check_repo():
@@ -2022,7 +2020,7 @@ def publish(all_refs=None, msg=None, top=True):
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
     help='Update to branch, tag, revision or latest',
     description=(
-        "Updates the current program or library and its dependencies to specified\nbranch, tag or revision.\n"
+        "Updates the current program or component and its dependencies to specified\nbranch, tag or revision.\n"
         "Alternatively fetches from associated remote repository URL and updates to the\n"
         "latest revision in the current branch."))
 def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=False, top=True, depth=None, protocol=None):
@@ -2030,7 +2028,7 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
         sync()
 
     cwd_type = Repo.pathtype(cwd_root)
-    cwd_dest = "program" if cwd_type == "directory" else "library"
+    cwd_dest = "program" if cwd_type == "directory" else "component"
 
     repo = Repo.fromrepo()
     # A copy of repo containing the .lib layout before updating
@@ -2064,19 +2062,19 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
                 error(err, e[0])
 
         repo.rm_untracked()
-        if top and cwd_type == 'library':
+        if top and cwd_type == 'component':
             repo.sync()
             repo.write()
 
-    # Compare library references (.lib) before and after update, and remove libraries that do not have references in the current revision
+    # Compare component references (.lib) before and after update, and remove libraries that do not have references in the current revision
     for lib in repo_orig.libs:
-        if not os.path.isfile(lib.lib) and os.path.isdir(lib.path): # Library reference doesn't exist in the new revision. Will try to remove library to reproduce original structure
+        if not os.path.isfile(lib.lib) and os.path.isdir(lib.path): # Library reference doesn't exist in the new revision. Will try to remove component to reproduce original structure
             gc = False
             with cd(lib.path):
                 lib_repo = Repo.fromrepo(lib.path)
                 gc, msg = lib_repo.can_update(clean, clean_deps)
             if gc:
-                action("Removing library \"%s\" (obsolete)" % (relpath(cwd_root, lib.path)))
+                action("Removing component \"%s\" (obsolete)" % (relpath(cwd_root, lib.path)))
                 rmtree_readonly(lib.path)
                 repo.unignore(relpath(repo.path, lib.path))
             else:
@@ -2085,7 +2083,7 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
                 else:
                     error(msg, 1)
 
-    # Reinitialize repo.libs() to reflect the library files after update
+    # Reinitialize repo.libs() to reflect the component files after update
     repo.sync()
 
     # Recheck libraries as their urls might have changed
@@ -2098,7 +2096,7 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
                 with cd(lib.path):
                     gc, msg = lib_repo.can_update(clean, clean_deps)
                 if gc:
-                    action("Removing library \"%s\" (changed URL). Will add from new URL." % (relpath(cwd_root, lib.path)))
+                    action("Removing component \"%s\" (changed URL). Will add from new URL." % (relpath(cwd_root, lib.path)))
                     rmtree_readonly(lib.path)
                     repo.unignore(relpath(repo.path, lib.path))
                 else:
@@ -2129,8 +2127,8 @@ def update(rev=None, clean=False, clean_files=False, clean_deps=False, ignore=Fa
     help='Synchronize mico component references',
     description=(
         "Synchronizes all component and dependency references (.component files) in the\n"
-        "current program or library.\n"
-        "Note that this will remove all invalid library references."))
+        "current program or component.\n"
+        "Note that this will remove all invalid component references."))
 def sync(recursive=True, keep_refs=False, top=True):
     if top and recursive:
         action("Synchronizing dependency references...")
@@ -2188,7 +2186,7 @@ def sync(recursive=True, keep_refs=False, top=True):
 
     # Update the .lib reference in the parent repository
     cwd_type = Repo.pathtype(cwd_root)
-    if top and cwd_type == "library":
+    if top and cwd_type == "component":
         repo = Repo.fromrepo()
         repo.write()
 
@@ -2199,7 +2197,7 @@ def sync(recursive=True, keep_refs=False, top=True):
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to missing libraries.'),
     help='View dependency tree',
     description=(
-        "View the dependency tree of the current program or library."))
+        "View the dependency tree of the current program or component."))
 def list_(detailed=False, prefix='', p_path=None, ignore=False):
     repo = Repo.fromrepo()
 
@@ -2222,7 +2220,7 @@ def list_(detailed=False, prefix='', p_path=None, ignore=False):
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to missing libraries.'),
     help='Show version control status\n\n',
     description=(
-        "Show uncommitted changes a program or library and its dependencies."))
+        "Show uncommitted changes a program or component and its dependencies."))
 def status_(ignore=False):
     repo = Repo.fromrepo()
     if repo.dirty():
@@ -2520,9 +2518,9 @@ def detect():
 
 # Make command
 @subcommand('make',
-    help='Make mico program/library\n\n',
+    help='Make mico program/component\n\n',
     description=(
-        "Make mico program/library."))
+        "Make mico program/component."))
 def make():
     # Get the make arguments
     make_args = ' '.join(sys.argv[2:])
