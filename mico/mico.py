@@ -89,7 +89,6 @@ cache_repositories = True
 # stores current working directory for recursive operations
 cwd_root = ""
 
-tools_root_file = 'mico-os/makefiles/scripts/tools_root'
 eclispe_project_dir = 'mico-os/makefiles/eclipse_project'
 
 # Logging and output
@@ -1827,24 +1826,19 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
             cwd_root = repo.path
 
         if repo.name == 'mico-os':
-            tools_root = Global().get_cfg('TOOLS_ROOT')
-            if tools_root:
-                with open(os.path.join(cwd_root, tools_root_file), 'w') as f:
-                    f.write('TOOLS_ROOT='+tools_root)
-            shutil.copy(os.path.join(cwd_root, 'mico-os', 'Makefile'), os.path.join(cwd_root, 'Makefile'))
-            if sys.platform == 'win32':
-                eclipse_subdir = 'Win32'
-            elif sys.platform == 'darwin':
-                eclipse_subdir = 'OSX'
-            elif sys.platform == 'linux':
-                eclipse_subdir = 'Linux64'
-            shutil.copy(os.path.join(cwd_root, eclispe_project_dir, eclipse_subdir, '.cproject'), os.path.join(cwd_root, '.cproject'))
-            shutil.copy(os.path.join(cwd_root, eclispe_project_dir, eclipse_subdir, '.project'), os.path.join(cwd_root, '.project'))
-            project_content = None
-            with open(os.path.join(cwd_root, '.project'), 'r') as f:
-                project_content = f.read()
-            with open(os.path.join(cwd_root, '.project'), 'w') as f:
-                f.write(project_content.replace('MiCO', Program(cwd_root).name))
+            target_dir = Program().path
+            target_name = Program().name
+            target_file_list = ('.project', '.cproject')
+            eclipse_subdir = 'Win32' if sys.platform == 'win32' else ('OSX' if sys.platform == 'darwin' else 'Linux64')
+            temp_dir = os.path.join(Program().path, 'mico-os/makefiles/eclipse_project', eclipse_subdir)
+            for file in target_file_list:
+                with open(os.path.join(temp_dir, file), 'r') as f:
+                    content = f.read()
+                target_file_name = file
+                target_file_content = content.replace('template', target_name)
+                target_file_path = os.path.join(target_dir, target_file_name)
+                with open(target_file_path, 'w') as f:
+                    f.write(target_file_content)
 
         with cd(repo.path):
             deploy(ignore=ignore, depth=depth, protocol=protocol, top=False)
@@ -2525,7 +2519,6 @@ def detect():
 def make():
     # Get the make arguments
     make_args = ' '.join(sys.argv[2:])
-    print 'make',make_args
 
     # Find the MiCoder directory
     builtin_micoder = os.path.join(Program().path,'mico-os/MiCoder')
@@ -2542,7 +2535,7 @@ def make():
 
     # Run make command
     host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
-    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, make_args])
+    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, '' if '-C' in make_args else '-C mico-os/makefiles', make_args])
     os.system(make_cmd_str)
     
 # Generic config command
