@@ -262,12 +262,12 @@ Making .openocd_cfg
 *make* 编译参数如下:
 
 * `<target>`用于选择编译目标. 目标由参与编译的各个组件构成, 以下的每一个组件用'@'分割开来。
-    * Application （项目中需要编译的应用程序组件，即应用程序在项目中的路径，并将`/`替换成`.`）
-    * Board  ( `mico-os/board/*`中定义的硬件平台组件 )
-    * [RTOS]  ( `mico-os/MiCO/rtos/*`中定义的RTOS内核组件, 默认使用 `FreeRTOS` )
-    * [Network Stack]  ( `mico-os/MiCO/net/*`中定义的网络协议栈组件，默认使用 `LwIP` )
-    * [TLS]  ( `mico-os/MiCO/security/TLS/*`中定义的安全传输组件, 默认使用 `wolfSSL` )
-    * [debug | release_log | release] 编译选项默认使用`release_log` ） 
+    * `Application` （项目中需要编译的应用程序组件，即应用程序在项目中的路径，并将`/`替换成`.`）
+    * `Board` ( `mico-os/board/*`中定义的硬件平台组件 )
+    * `[RTOS]` ( `mico-os/MiCO/rtos/*`中定义的RTOS内核组件, 默认使用 `FreeRTOS` )
+    * `[Network Stack]` ( `mico-os/MiCO/net/*`中定义的网络协议栈组件，默认使用 `LwIP` )
+    * `[TLS]` ( `mico-os/MiCO/security/TLS/*`中定义的安全传输组件, 默认使用 `wolfSSL` )
+    * `[debug | release_log | release]` ( 编译选项默认使用`release_log` ） 
 <span class="notes">**Note**: 如果你使用moc平台，例如 `MK3031`, `MK3080`, 添加 `moc` 等同于同时添加 `mocOS@mocIP@mocTLS`。 </span>
 
 * `[download]` 下载目标固件到硬件平台。

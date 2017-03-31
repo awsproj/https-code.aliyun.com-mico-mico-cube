@@ -283,12 +283,12 @@ Making .openocd_cfg
 The arguments for *compile* are:
 
 * `<target>` to select a target. Target is compiled by components, One each of the following mandatory [and optional] components separated by '@'
-    * Application ( Application's directory under the program root, and replace `/` by `.` in path ) 
-    * Board  ( Hardware platform component defined under `mico-os/board/*` )
-    * [RTOS]  ( RTOS component defined under `mico-os/MiCO/rtos/*`, default is `FreeRTOS` )
-    * [Network Stack]  ( Network stack component defined under `mico-os/MiCO/net/*`, default is `LwIP` )
-    * [TLS]  ( TLS component defined under `mico-os/MiCO/security/TLS/*`, default is `wolfSSL` )
-    * [debug | release_log | release]  ( Building for debug or release configurations, defalut is `release_log` ）
+    * `Application` ( Application's directory under the program root, and replace `/` by `.` in path ) 
+    * `Board` ( Hardware platform component defined under `mico-os/board/*` )
+    * `[RTOS]` ( RTOS component defined under `mico-os/MiCO/rtos/*`, default is `FreeRTOS` )
+    * `[Network Stack]` ( Network stack component defined under `mico-os/MiCO/net/*`, default is `LwIP` )
+    * `[TLS]` ( TLS component defined under `mico-os/MiCO/security/TLS/*`, default is `wolfSSL` )
+    * `[debug | release_log | release]` ( Building for debug or release configurations, defalut is `release_log` ）
 <span class="notes">**Note**: If you are building a moc platform like `MK3031`, `MK3080`, add `moc` as a component equals to `mocOS@mocIP@mocTLS`. </span>
 
 * `[download]` Download firmware image to target platform.
