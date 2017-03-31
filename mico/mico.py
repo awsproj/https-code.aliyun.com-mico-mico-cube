@@ -557,7 +557,7 @@ class Git(object):
             rmtree_readonly(os.path.join('.git', 'logs'))
 
     def clone(url, name=None, depth=None, protocol=None):
-        pquery([git_cmd, 'clone', formaturl(url, protocol), name] + (['--depth', depth] if depth else []) + (['-v'] if very_verbose else ([] if verbose else ['-q'])))
+        popen([git_cmd, 'clone', formaturl(url, protocol), name] + (['--depth', depth] if depth else []) + (['-v'] if very_verbose else ([] if verbose else ['-q'])))
 
     def add(dest):
         info("Adding reference "+dest)
@@ -1740,16 +1740,16 @@ def new(name, scm='git', program=False, component=False, micolib=False, create_o
     # Copy template files
     if d_type == 'program':
         target_dir = d_path
-        os.mkdir(os.path.join(d_path, name))
-        target_name = name
+        target_name = Program().name
         target_file_list = ('template/main.c', 'template/mico_config.h', 'README.md', 'template/template.mk')
         temp_dir = os.path.join(d_path, 'mico-os/template/program')
+        os.mkdir(os.path.join(d_path, target_name))
     else:
         target_dir = d_path
-        os.mkdir(os.path.join(d_path, 'test'))
         target_name = name
         target_file_list = ('template.c', 'template.h', 'README.md', 'template.mk', 'test/README.md', 'test/main.c', 'test/mico_config.h', 'test/test.mk')
         temp_dir = os.path.join(p_path, 'mico-os/template/component')
+        os.mkdir(os.path.join(d_path, 'test'))
         os.chdir(d_path)
 
     for file in target_file_list:
@@ -1972,7 +1972,7 @@ def publish(all_refs=None, msg=None, top=True):
     repo = Repo.fromrepo()
     if repo.is_local:
         error(
-            "%s \"%s\" in \"%s\" is a local repository.\nPlease associate it with a remote repository URL before attempting to publish.\n"
+            "%s \"%s\" in \"%s\" with %s is a local repository.\nPlease associate it with a remote repository URL before attempting to publish.\n"
             "Read more about publishing local repositories here:\nhttps://code.aliyun.com/mico/mico-cli/#publishing-local-program-or-component" % ("Program" if top else "Library", repo.name, repo.path, repo.scm.name), 1)
 
     for lib in repo.libs:
@@ -2544,7 +2544,7 @@ def make():
     dict(name='value', nargs='?', help='Value. Will show the currently set default value for a variable if not specified.'),
     dict(name=['-G', '--global'], dest='global_cfg', action='store_true', help='Use global settings, not local'),
     dict(name=['-U', '--unset'], dest='unset', action='store_true', help='Unset the specified variable.'),
-    dict(name=['-L', '--list'], dest='list_config', action='store_true', help='List mico tool configuration. Not to be confused with compile configuration, e.g. "mico compile --config".'),
+    dict(name=['-L', '--list'], dest='list_config', action='store_true', help='List mico tool configuration.'),
     help='Tool configuration',
     description=(
         "Gets, sets or unsets mico tool configuration options.\n"
