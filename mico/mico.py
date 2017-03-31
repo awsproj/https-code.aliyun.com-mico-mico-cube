@@ -2540,7 +2540,7 @@ def make():
     
 # Generic config command
 @subcommand('config',
-    dict(name='var', nargs='?', help='Variable name. E.g. "target", "toolchain", "protocol"'),
+    dict(name='var', nargs='?', help='Variable name. E.g. "micoder", "protocol"'),
     dict(name='value', nargs='?', help='Value. Will show the currently set default value for a variable if not specified.'),
     dict(name=['-G', '--global'], dest='global_cfg', action='store_true', help='Use global settings, not local'),
     dict(name=['-U', '--unset'], dest='unset', action='store_true', help='Unset the specified variable.'),
@@ -2550,7 +2550,7 @@ def make():
         "Gets, sets or unsets mico tool configuration options.\n"
         "Options can be global (via the --global switch) or local (per program)\n"
         "Global options are always overridden by local/program options.\n"
-        "Currently supported options: target, toolchain, protocol, depth, cache"))
+        "Currently supported options: micoder, protocol, depth, cache"))
 def config_(var=None, value=None, global_cfg=False, unset=False, list_config=False):
     name = var
     var = str(var).upper()
