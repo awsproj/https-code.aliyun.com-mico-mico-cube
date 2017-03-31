@@ -1730,12 +1730,11 @@ def new(name, scm='git', program=False, component=False, micolib=False, create_o
                 raise e
         if d_path:
             os.chdir(d_path)
+            Repo.fromrepo().ignores()
     else:
         p.unset_root(d_path)
         with cd(p_path):
             sync()
-
-    Repo.fromrepo().ignores()
 
     # Copy template files
     if d_type == 'program':
