@@ -227,7 +227,7 @@ $ mico config --global MICODER ~/MiCO_SDK/MiCO/MiCoder
 [mico] /Users/william/MiCO_SDK/MiCO/MiCoder now set as default MICODER in program "helloworld"
 ```
 
-The `-G` or `--globle` switch tells MiCO CLI to set this as a global setting, rather than local for the current program.
+The `-G` or `--global` switch tells MiCO CLI to set this as a global setting, rather than local for the current program.
 
 You can see the active MiCO CLI configuration via:
 

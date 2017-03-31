@@ -207,7 +207,7 @@ $ mico config --global MICODER ~/MiCO_SDK/MiCO/MiCoder
 [mico] /Users/william/MiCO_SDK/MiCO/MiCoder now set as default MICODER in program "helloworld"
 ```
 
-`-G` 或 `--globle` 开关可以让MiCO CLI设置一个全局的参数，而不是针对当前项目的私有参数。
+`-G` 或 `--global` 开关可以让MiCO CLI设置一个全局的参数，而不是针对当前项目的私有参数。
 
 你可以通过下面的命令查看 MiCO CLI 的有效配置参数：
 
