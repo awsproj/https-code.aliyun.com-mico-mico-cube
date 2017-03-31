@@ -23,6 +23,7 @@ This document covers the installation and usage of MiCO CLI.
     2. [Pushing upstream](#pushing-upstream)
 1. [Publishing a local program or component](#publishing-a-local-program-or-component)
     1. [Checking status](#checking-status)
+    2. [Pushing upstream](#pushing-upstream)
 1. [Updating programs and components](#updating-programs-and-components)
     1. [Updating to an upstream version](#updating-to-an-upstream-version)
     2. [Update examples](#update-examples)
@@ -214,8 +215,8 @@ $ mico remove Lib_aws
 
 After importing a program or creating a new one, you need to tell MiCO CLI where to find the MiCoder Tools that you want to use for compiling your source tree.
 
-The only may to do this:
-* Through the MiCO CLI configuration.
+The only way to do this is using MiCO CLI configuration: `mico config`.
+
 
 #### Through MiCO CLI configuration
 
@@ -233,7 +234,7 @@ You can see the active MiCO CLI configuration via:
 ```
 $ mico config --list
 [mico] Global config:
-TOOLS_ROOT=/Users/william/Develop/MiCO_SDK/MiCO/MiCoder/
+MICODER=/Users/william/Develop/MiCO_SDK/MiCO/MiCoder/
 
 [mico] Local config (/Users/william/Develop/mico-program/helloworld):
 MICODER=/Users/william/Develop/MiCO_SDK/MiCO/MiCoder
@@ -282,12 +283,12 @@ Making .openocd_cfg
 The arguments for *compile* are:
 
 * `<target>` to select a target. Target is compiled by components, One each of the following mandatory [and optional] components separated by '@'
-    * Application
-    * Board ( Hardware platform component defined under `mico-os/board/*`)
-    * [RTOS] ( RTOS component defined under `mico-os/MiCO/rtos/*`, default is `FreeRTOS`)
-    * [Network Stack] ( Network stack component defined under `mico-os/MiCO/net/*`, default is `LwIP`)
-    * [TLS] ( TLS component defined under `mico-os/MiCO/security/TLS/*`, default is `wolfSSL`)
-    * [debug | release_log | release] ( Building for debug or release configurations, defalut is `release_log` ）
+    * Application ( Application's directory under the program root, and replace `/` by `.` in path ) 
+    * Board  ( Hardware platform component defined under `mico-os/board/*` )
+    * [RTOS]  ( RTOS component defined under `mico-os/MiCO/rtos/*`, default is `FreeRTOS` )
+    * [Network Stack]  ( Network stack component defined under `mico-os/MiCO/net/*`, default is `LwIP` )
+    * [TLS]  ( TLS component defined under `mico-os/MiCO/security/TLS/*`, default is `wolfSSL` )
+    * [debug | release_log | release]  ( Building for debug or release configurations, defalut is `release_log` ）
 <span class="notes">**Note**: If you are building a moc platform like `MK3031`, `MK3080`, add `moc` as a component equals to `mocOS@mocIP@mocTLS`. </span>
 
 * `[download]` Download firmware image to target platform.

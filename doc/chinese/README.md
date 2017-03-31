@@ -85,7 +85,7 @@ $ mico update master   # This will update "mico-os", not "mico-example-program"
 ```
 大量的MiCO CLI功能需要一个基于版本控制 [Git](https://git-scm.com/) 或者 [Mercurial](https://www.mercurial-scm.org/) 的项目根目录. 他使得整个项目以及包含的组件能够自由地切换版本，管理历史记录，与版本库同步，与其他开发者共享等等。MiCO OS也是包含版本管理的开源项目，允许各个开发者向MiCO OS贡献代码。
 
-<span class="warnings">**注意**: MiCO CLI 在以`.component` 为后缀的文件（例如`lib_name.component`）中保存必要组件的链接信息; 以`.code` 为后缀的文件（例如`name_src.codes`）中保存可选组件的链接信息. 这些文件都是可读的文本文件，但是我们强烈建议不要手动修改文件的内容，而是使用MiCO CLI的相应命令来自动生成和修改，例如：`$ mico sync`。这些文件我们称之为依赖描述文件。</span>
+<span class="warnings">**注意**: MiCO CLI 在以`.component` 为后缀的文件（例如`lib_name.component`）中保存依赖组件的链接信息; 以`.code` 为后缀的文件（例如`name_src.codes`）中保存可选依赖组件的链接信息. 这些文件都是可读的文本文件，但是我们强烈建议不要手动修改文件的内容，而是使用MiCO CLI的相应命令来自动生成和修改，例如：`$ mico sync`。这些文件我们称之为依赖描述文件。</span>
 
 
 ## 创建和导入项目
@@ -94,7 +94,7 @@ MiCO CLI可以创建和导入基于MiCO OS 4的软件项目。
 
 ### 创建一个新项目
 
-每当你创建一个新项目，MiCO CLI自动导入最新的 [mico OS](https://code.aliyun.com/mico/mico-os)。 每一个发布都包含了所有组件: 代码和编译调试脚本。
+每当你创建一个新项目，MiCO CLI自动导入最新的 [mico OS](https://code.aliyun.com/mico/mico-os)。 每一个发布都包含了所有组件:  代码和编译调试脚本。
 
 接下来让我们来创建一个新的项目 (命名为`mico-os-program`):
 
@@ -118,7 +118,7 @@ mico-os-program (mico-os-program)
 `- mico-os (https://code.aliyun.com/mico/mico-os/#89962277c207)
 ```
 
-<span class="notes">**Note**: 如果您从一个现有的空目录开始，可以使用`mico new .`命令来初始化MiCO项目，并且在该文件夹中初始化版本仓库. </span>
+<span class="notes">**Note**: 如果您从一个现有的空目录开始，可以使用`mico new .`命令来初始化MiCO项目，并且在该文件夹中初始化版本仓库。</span>
 
 
 ### 创建不包含MiCO OS的新项目
@@ -170,14 +170,14 @@ $ mico new .
 MiCO CLI添加和删除功能不等同于``hg``, ``git``版本管理软件的内置功能，而是针对MiCO项目的特点进行了改造：
 
 * 将新的组件添加到项目中不等同于从版本库中克隆一个仓库，所以不要使用 `hg` 或 `git` 命令，而要使用 `mico add` 来添加组件。它可以保证所有的依赖（组件以及子组件）都能被同时生成出来。
-* 移除一个组件也不仅仅是删除这个组件目录 - 组件链接文件（`.component`）也需要删除和升级。使用 `mico remove` 命令来移除组件，而不要简单地使用 `rm` 命令。
+* 移除一个组件也不仅仅是删除这个组件目录 - 依赖描述文件（`.component`）也需要删除和升级。使用 `mico remove` 命令来移除组件，而不要简单地使用 `rm` 命令。
 
 ### 添加组件
 
 使用 `mico add` 命令添加组件的最新版本：
 
 ```
-$ mico add https://code.aliyun.com/mico/Lib_aws.git/
+$ mico add https://code.aliyun.com/mico/Lib_aws.git
 ```
 
 可以使用URL#hash格式来添加一个组件的特定版本 format to add a library at a specific revision:
@@ -207,7 +207,7 @@ $ mico config --global MICODER ~/MiCO_SDK/MiCO/MiCoder
 [mico] /Users/william/MiCO_SDK/MiCO/MiCoder now set as default MICODER in program "helloworld"
 ```
 
-`-G` 或 `--globle` 开关可以告诉MiCO CLI设置一个全局的设置，而不是针对当前项目的私有设置。
+`-G` 或 `--globle` 开关可以让MiCO CLI设置一个全局的参数，而不是针对当前项目的私有参数。
 
 你可以通过下面的命令查看 MiCO CLI 的有效配置参数：
 
@@ -262,12 +262,12 @@ Making .openocd_cfg
 *make* 编译参数如下:
 
 * `<target>`用于选择编译目标. 目标由参与编译的各个组件构成, 以下的每一个组件用'@'分割开来。
-    * Application （项目中需要编译的应用程序组件）
-    * Board ( `mico-os/board/*`中定义的硬件平台组件 )
-    * [RTOS] ( `mico-os/MiCO/rtos/*`中定义的RTOS内核组件, 默认使用 `FreeRTOS` )
-    * [Network Stack] ( `mico-os/MiCO/net/*`中定义的网络协议栈组件，默认使用 `LwIP` )
-    * [TLS] ( `mico-os/MiCO/security/TLS/*`中定义的安全传输组件, 默认使用 `wolfSSL` )
-    * [debug | release_log | release] 编译选项默认使用`release_log` ）
+    * Application （项目中需要编译的应用程序组件，即应用程序在项目中的路径，并将`/`替换成`.`）
+    * Board  ( `mico-os/board/*`中定义的硬件平台组件 )
+    * [RTOS]  ( `mico-os/MiCO/rtos/*`中定义的RTOS内核组件, 默认使用 `FreeRTOS` )
+    * [Network Stack]  ( `mico-os/MiCO/net/*`中定义的网络协议栈组件，默认使用 `LwIP` )
+    * [TLS]  ( `mico-os/MiCO/security/TLS/*`中定义的安全传输组件, 默认使用 `wolfSSL` )
+    * [debug | release_log | release] 编译选项默认使用`release_log` ） 
 <span class="notes">**Note**: 如果你使用moc平台，例如 `MK3031`, `MK3080`, 添加 `moc` 等同于同时添加 `mocOS@mocIP@mocTLS`。 </span>
 
 * `[download]` 下载目标固件到硬件平台。
@@ -287,8 +287,8 @@ Making .openocd_cfg
 MiCoder IDE可以导入MiCO项目，这样不仅可以在图形化界面下编写代码，还可以很方便地调试。MiCO CLI会自动在项目根目录下生成MiCoder IDE的工程文件(`.project` 和 `.cproject`) ，然后你随时可以用MiCoder IDE导入当前项目。
 
 1. 启动 MiCoder IDE。
-1. 导入MiCoder工程. (点击 File > Import, 选择 General > Existing Projects into Workspace)
-1. 修改当前调试的项目 （点击 Debug Configurations > GDB Hardware Debugging > MiCO, 将  Project 设置成当前 project ), 点击Apply。
+1. 导入MiCoder工程。 (点击 File > Import, 选择 General > Existing Projects into Workspace)
+1. 修改当前调试的项目 （点击 Debug Configurations > GDB Hardware Debugging > MiCO, 将  Project 设置成当前 project )，点击Apply。
 1. 连接仿真器硬件，设置断点，启动调试。
  
 
@@ -369,7 +369,7 @@ $ git remote set-url --push origin https://code.aliyun.com/william/repo-fork.git
 在升级时，有两种主要的应用场景：
 
 * 升级到 *持续更新* 版本, 例如一个分支的最新版本。
-* 升级到 *特定* 版本，版本通过版本的哈希值或者标签名称来定义。
+* 升级到 *特定* 版本，版本通过提交的哈希值或者标签名称来定义。
 
 每一种场景又两种案例：
 
