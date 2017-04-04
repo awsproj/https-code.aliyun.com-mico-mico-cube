@@ -34,6 +34,7 @@ import urllib2
 import zipfile
 import argparse
 import tempfile
+from distutils.version import LooseVersion
 
 
 # Application version
@@ -1606,6 +1607,14 @@ def formaturl(url, format="default"):
                     url = 'https://%s/%s' % (m.group(2), m.group(3))
     return url
 
+def get_micoder_dir():
+    # Find the MiCoder directory
+    builtin_micoder = os.path.join(Program().path,'mico-os/MiCoder')
+    micoder_dir = Program().get_cfg('MICODER') or Global().get_cfg('MICODER') or \
+    (builtin_micoder if os.path.isdir(builtin_micoder) else None)
+    if not micoder_dir:
+        error('Can not find MiCoder!')
+    return micoder_dir
 
 # Subparser handling
 parser = argparse.ArgumentParser(prog='mico',
@@ -2519,12 +2528,7 @@ def make():
     # Get the make arguments
     make_args = ' '.join(sys.argv[2:])
 
-    # Find the MiCoder directory
-    builtin_micoder = os.path.join(Program().path,'mico-os/MiCoder')
-    micoder_dir = Program().get_cfg('MICODER') or Global().get_cfg('MICODER') or \
-    (builtin_micoder if os.path.isdir(builtin_micoder) else None)
-    if not micoder_dir:
-        error('Can not find MiCoder!')
+    micoder_dir = get_micoder_dir()
 
     # Decide which make to use according to the platform system 
     win_make = os.path.join(micoder_dir,'cmd/Win32/make.exe')
@@ -2610,6 +2614,44 @@ def config_(var=None, value=None, global_cfg=False, unset=False, list_config=Fal
     else:
         subcommands['config'].error("too few arguments")
 
+# Make command
+@subcommand('lib',
+    help='Compile library in current directory\n\n',
+    description=(
+        "Compile library in current directory."))
+def lib():
+    cwd = os.getcwd()
+    src_files = []
+    inc_dirs = ['.']
+    obj_files = []
+
+    for root, dirs, files in os.walk(cwd):
+        root = root[len(cwd)+1:]
+        for file in files:
+            if file.endswith('.c'):
+                src_files.append(os.path.join(root,file))
+        for dir in dirs:
+            inc_dirs.append(os.path.join(root,dir))
+
+    micoder_dir = get_micoder_dir()
+    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
+    gcc_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-gcc')
+    ar_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-ar')
+
+    gcc_inc_str = '-I'+' -I'.join(inc_dirs)
+    gcc_mcu_str = '-mthumb -mcpu=cortex-m3'
+    gcc_opt_str = '-c'
+
+    for src_file in src_files:
+        obj_file = src_file.replace('.c','.o')
+        obj_files.append(obj_file)
+        os.system(' '.join((gcc_cmd_str,gcc_mcu_str,gcc_opt_str,gcc_inc_str,'-o',obj_file,src_file)))
+    
+    os.system(' '.join((ar_cmd_str,'-r lib.a',' '.join(obj_files))))
+
+    for obj_file in obj_files:
+        os.remove(obj_file)
+
 '''
 # Build system and exporters
 @subcommand('target',
@@ -2643,6 +2685,29 @@ def toolchain_(name=None, global_cfg=False, supported=False):
 def help_():
     return parser.print_help()
 
+@subcommand('upgrade',
+    help='Upgrade mico-cli')
+def upgrade():
+	path = os.path.expanduser('~/.mico/.rev')
+	url = 'https://code.aliyun.com/mico/mico-cli.git'
+	if not os.path.isdir(path):
+		repo = Repo.fromurl(url, path)
+		if not repo.clone(repo.url, repo.path, repo.rev, None, None):
+			error("Unable to clone repository (%s)" % url, 1)
+
+	with cd(path):
+		lines = pquery([git_cmd, 'ls-remote','-t','-q']).strip().splitlines()
+		m = re.match(r'(.+?)refs/tags/v(\d.\d.\d)', lines[-1])
+		if m:
+			remote_tag = m.group(2)
+			if LooseVersion(ver) < LooseVersion(remote_tag):
+				print 'A new veriosn of mico-cli is avaliable, downloading...'
+				pquery([git_cmd, 'pull'])
+				print 'Download completed, installing...'
+				pquery(['python','setup.py','install'])
+				print 'Install completed'
+				return True
+	return False
 
 def main():
     global verbose, very_verbose, remainder, cwd_root
