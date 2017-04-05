@@ -12,6 +12,8 @@
 
 import os
 from setuptools import setup
+import subprocess
+import sys
 
 LONG_DESC = open('pypi_readme.rst').read()
 LICENSE = open('LICENSE').read()
@@ -33,3 +35,9 @@ setup(
         ]
     },
 )
+
+# if windows
+if sys.platform == 'win32':
+    # if not register
+    if subprocess.Popen('reg query "HKEY_CLASSES_ROOT\directory\shell\mico_cli" /s', stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait() == 1:
+        os.system('mico-cli.reg')

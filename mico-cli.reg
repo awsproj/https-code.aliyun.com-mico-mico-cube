@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+[HKEY_CLASSES_ROOT\directory\shell\mico_cli]
+@="mico-cli here"
+[HKEY_CLASSES_ROOT\directory\shell\mico_cli\command]
+@="cmd.exe"
+[HKEY_CLASSES_ROOT\directory\background\shell\mico_cli]
+@="mico-cli here"
+[HKEY_CLASSES_ROOT\directory\background\shell\mico_cli\command]
+@="cmd.exe"
