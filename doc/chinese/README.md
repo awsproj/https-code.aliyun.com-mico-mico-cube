@@ -1,11 +1,15 @@
 ## 介绍
-*MiCO CLI* 是MXCHIP的MiCO命令行工具，脚本名称为：mico-cli。它用于完成基于MiCO的完整开发流程，包括：代码库版本管理，维护代码依赖，发布代码，从远程代码仓库更新以及启动MiCO编译系统实现编译，下载，调试等
+*MiCO CLI* 是MXCHIP的MiCO命令行工具，脚本名称为：mico-cli。它用于完成基于MiCO的完整开发流程，包括：代码库版本管理，维护代码依赖，发布代码，从远程代码仓库更新以及启动MiCO编译系统实现编译，下载，调试等。  
+
 该文档包含了MiCO CLI的安装和使用方法。
 
 ## 目录
 
 1. [使用MiCO CLI](#使用mico-cli)
-1. [安装](#安装)
+1. [安装和升级](#安装)
+    1. [要求](#要求)
+    2. [安装MiCO CLI](#安装mico-cli)
+    3. [升级MiCO CLI](#升级mico-cli)
 1. [了解工作区和项目根目录](#写在最前-了解工作区和项目根目录)
 1. [创建和导入项目](#创建和导入项目)
     1. [创建一个新项目](#创建一个新项目)
@@ -71,6 +75,16 @@ $ git clone https://code.aliyun.com/mico/mico-cli.git
 克隆完成后，通过以下命令安装MiCO CLI:
 ```
 $ python setup.py install
+```
+在Linux和Mac上, 需要加上`sudo`获得安装权限.
+
+### 升级MiCO CLI
+MiCO CLI安装完成后，可以通过`mico upgrade`命令来升级MiCO CLI的版本。
+```
+$ mico upgrade
+A new veriosn of mico-cli is avaliable, downloading...
+Download completed, installing...
+Install completed
 ```
 在Linux和Mac上, 需要加上`sudo`获得安装权限.
 
@@ -420,7 +434,7 @@ __我需要一个干净的升级（丢弃所有本地未提交的改动）__
 
 <span class="warnings">**Warning**: `--clean` 告诉MiCO CLI升级项目或者组件以及他们的依赖项，并且覆盖所有本地的改动。这个操纵无法复原，所以要谨慎执行。</span>
 
-**Case 2: 我要升级一个项目或者组件到指定版本或者标签**
+**案例 2: 我要升级一个项目或者组件到指定版本或者标签**
  
 __我希望保留本地未提交的改动__ 
 

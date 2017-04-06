@@ -7,7 +7,10 @@ This document covers the installation and usage of MiCO CLI.
 ## Table of Contents
 
 1. [Using MiCO CLI](#using-mico-cli)
-1. [Installing and uninstalling](#installing-mico-cli)
+1. [Installing and upgrading](#Installation)
+    1. [Requirements](#requirements)
+    2. [Installing MiCO CLI](#installing-mico-cli)
+    3. [Upgrading MiCO CLI](#upgrading-mico-cli)
 1. [Understanding working context and program root](#before-you-begin-understanding-the-working-context-and-program-root)
 1. [Creating and importing programs](#creating-and-importing-programs)
     1. [Creating a new program](#creating-a-new-program-for-mico-os)
@@ -83,6 +86,16 @@ Once cloned, you can install MiCO CLI as a python package:
 $ python setup.py install
 ```
 
+On Linux or Mac, you may need to run with `sudo`.
+
+### Upgrading MiCO CLI
+Once MiCO CLI installed，you can use command `mico upgrade` to upgrade MiCO CLI to latest version.
+```
+$ mico upgrade
+A new veriosn of mico-cli is avaliable, downloading...
+Download completed, installing...
+Install completed
+```
 On Linux or Mac, you may need to run with `sudo`.
 
 <span class="tips">**Note:** MiCO CLI is compatible with [Virtual Python Environment (virtualenv)](https://pypi.python.org/pypi/virtualenv). You can read more about isolated Python virtual environments [here](http://docs.python-guide.org/en/latest/).</span>
