@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.1'
+ver = '1.0.2'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -2532,13 +2532,15 @@ def make():
 
     # Decide which make to use according to the platform system 
     win_make = os.path.join(micoder_dir,'cmd/Win32/make.exe')
-    make_cmd = 'make' if (sys.platform == 'darwin' or sys.platform == 'linux') else (win_make if sys.platform == 'win32' else None)
+    mac_make = os.path.join(micoder_dir,'cmd/OSX/make')
+    linux_make = os.path.join(micoder_dir,'cmd/Linux64/make')
+    make_cmd = mac_make if sys.platform == 'darwin' else (linux_make if sys.platform == 'linux' else (win_make if sys.platform == 'win32' else None))
     if not make_cmd:
         error('Unsupported system!')
 
     # Run make command
     host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
-    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, '' if '-C' in make_args else '-C mico-os/makefiles', make_args])
+    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, '' if '-C' in make_args else '-f mico-os/makefiles/Makefile', make_args])
     os.system(make_cmd_str)
     
 # Generic config command
