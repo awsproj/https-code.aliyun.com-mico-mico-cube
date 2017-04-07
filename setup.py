@@ -19,11 +19,11 @@ LONG_DESC = open('pypi_readme.rst').read()
 LICENSE = open('LICENSE').read()
 
 setup(
-    name="mico-cli",
+    name="mico-cube",
     version="1.0.0",
     description="MXCHIP MiCO command line tool for repositories version control, publishing and updating code from remotely hosted repositories, and invoking MiCO OS own build system and export functions, among other operations",
     long_description=LONG_DESC,
-    url='https://code.aliyun.com/mico/mico-cli',
+    url='https://code.aliyun.com/mico/mico-cube',
     author='MXCHIP MiCO',
     author_email='yangsw@mxchip.com',
     license=LICENSE,
@@ -31,7 +31,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mico=mico.mico:main',
-            'mico-cli=mico.mico:main',
+            'mico-cube=mico.mico:main',
         ]
     },
 )
@@ -39,5 +39,5 @@ setup(
 # if windows
 if sys.platform == 'win32':
     # if not register
-    if subprocess.Popen('reg query "HKEY_CLASSES_ROOT\directory\shell\mico_cli" /s', stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait() == 1:
-        os.system('mico-cli.reg')
+    if subprocess.Popen('reg query "HKEY_CLASSES_ROOT\directory\shell\mico_cube" /s', stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait() == 1:
+        os.system('mico-cube.reg')

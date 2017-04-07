@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.2'
+ver = '1.0.3'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -1618,7 +1618,7 @@ def get_micoder_dir():
 
 # Subparser handling
 parser = argparse.ArgumentParser(prog='mico',
-    description="Command-line code management tool for MXCHIP MiCO OS - https://code.aliyun.com/mico/mico-os\nversion %s\n\nUse 'mico <command> -h|--help' for detailed help.\nOnline manual and guide available at https://code.aliyun.com/mico/mico-cli" % ver,
+    description="Code management tool for MXCHIP MiCO OS - https://code.aliyun.com/mico/mico-os\nversion %s\n\nUse 'mico <command> -h|--help' for detailed help.\nOnline manual and guide available at https://code.aliyun.com/mico/mico-cube" % ver,
     formatter_class=argparse.RawTextHelpFormatter)
 subparsers = parser.add_subparsers(title="Commands", metavar="           ")
 parser.add_argument("--version", action="store_true", dest="version", help="print version number and exit")
@@ -1981,7 +1981,7 @@ def publish(all_refs=None, msg=None, top=True):
     if repo.is_local:
         error(
             "%s \"%s\" in \"%s\" with %s is a local repository.\nPlease associate it with a remote repository URL before attempting to publish.\n"
-            "Read more about publishing local repositories here:\nhttps://code.aliyun.com/mico/mico-cli/#publishing-local-program-or-component" % ("Program" if top else "Library", repo.name, repo.path, repo.scm.name), 1)
+            "Read more about publishing local repositories here:\nhttps://code.aliyun.com/mico/mico-cube/#publishing-local-program-or-component" % ("Program" if top else "Library", repo.name, repo.path, repo.scm.name), 1)
 
     for lib in repo.libs:
         if lib.check_repo():
@@ -2688,10 +2688,10 @@ def help_():
     return parser.print_help()
 
 @subcommand('upgrade',
-    help='Upgrade mico-cli')
+    help='Upgrade mico-cube')
 def upgrade():
 	path = os.path.expanduser('~/.mico/.rev')
-	url = 'https://code.aliyun.com/mico/mico-cli.git'
+	url = 'https://code.aliyun.com/mico/mico-cube.git'
 	if not os.path.isdir(path):
 		repo = Repo.fromurl(url, path)
 		if not repo.clone(repo.url, repo.path, repo.rev, None, None):
@@ -2703,7 +2703,7 @@ def upgrade():
 		if m:
 			remote_tag = m.group(2)
 			if LooseVersion(ver) < LooseVersion(remote_tag):
-				print 'A new veriosn of mico-cli is avaliable, downloading...'
+				print 'A new veriosn of mico-cube is avaliable, downloading...'
 				pquery([git_cmd, 'pull'])
 				print 'Download completed, installing...'
 				pquery(['python','setup.py','install'])
@@ -2719,8 +2719,8 @@ def main():
 
     if sys.version_info[0] != 2 or sys.version_info[1] < 7:
         error(
-            "mico CLI is compatible with Python version >= 2.7 and < 3.0\n"
-            "Please refer to the online guide available at https://code.aliyun.com/mico/mico-cli")
+            "mico cube is compatible with Python version >= 2.7 and < 3.0\n"
+            "Please refer to the online guide available at https://code.aliyun.com/mico/mico-cube")
 
     # Parse/run command
     if len(sys.argv) <= 1:
