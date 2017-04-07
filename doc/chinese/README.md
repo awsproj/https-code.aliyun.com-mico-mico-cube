@@ -391,7 +391,7 @@ $ git remote set-url --push origin https://code.aliyun.com/william/repo-fork.git
 
 每一种场景又两种案例：
 
-* 更新并保留本地的改动 - *肮脏* 升级。
+* 更新并保留本地的改动 - *污染* 升级。
 * 更新并删除本地的改动 - *干净* 升级。
 
 和其他的MiCO Cube命令一行，`mico update` 命令使用当前目录作为工作交换区，所以在执行`mico update` 之前，应首先将当前的工作目录切换到需要更新的版本库目录。例如，如果你需要更新mico-os，先使用 `cd mico-os` 。
