@@ -1,19 +1,22 @@
-## 介绍
-*MiCO CLI* 是MXCHIP的MiCO命令行工具，脚本名称为：mico-cli。它用于完成基于MiCO的完整开发流程，包括：代码库版本管理，维护代码依赖，发布代码，从远程代码仓库更新以及启动MiCO编译系统实现编译，下载，调试等。  
+# MiCO Cube参考手册
 
-该文档包含了MiCO CLI的安装和使用方法。
+## 介绍
+**MiCO Cube** 是MXCHIP的MiCO项目开发管理工具包，脚本名称为：mico-cube。它用于管理基于MiCO的完整开发流程，包括：代码库版本管理，维护代码依赖，发布代码，从远程代码仓库更新以及启动MiCO编译系统实现编译，下载，调试等。  
+
+该文档包含了MiCO Cube的安装和使用方法。
 
 ## 目录
 
-1. [使用MiCO CLI](#使用mico-cli)
+1. [使用MiCO Cube](#使用mico-cube)
 1. [安装和升级](#安装)
     1. [要求](#要求)
-    2. [安装MiCO CLI](#安装mico-cli)
-    3. [升级MiCO CLI](#升级mico-cli)
+    2. [安装MiCO Cube](#安装mico-cube)
+    3. [升级MiCO Cube](#升级mico-cube)
 1. [了解工作区和项目根目录](#写在最前-了解工作区和项目根目录)
 1. [创建和导入项目](#创建和导入项目)
     1. [创建一个新项目](#创建一个新项目)
     2. [导入一个现有的项目](#导入一个现有的项目)
+    3. [从一个现有的 Git 仓库克隆导入](#从一个现有的-git-仓库克隆导入)
 1. [增加和删除组件](#添加和移除组件)
 1. [代码编译](#代码编译)
     1. [选择MiCoder Tool](#选择micoder-tools)
@@ -30,33 +33,33 @@
     2. [升级示例](#升级示例)
 
 
-## 使用MiCO CLI
+## 使用MiCO Cube
 
-MiCO CLI的基本工作流程是:
+MiCO Cube的基本工作流程是:
 
 1. 新建或者导入一个项目或组件，并为它创建一个版本库。无论新建还是导入，都会在项目中自动附带一个MiCO OS的版本库.
 1. 编译，下载和调试应用程序代码.
 1. 发布您的应用程序.
-除了以上基本的工作流，MiCO CLI针对长期的开发和维护，提供了额外的版本控制功能。它可以基于版本库进行选择性的升级，使得您的应用程序做包含的MiCO OS和其他组件在持续的更新中仍然能够维持开发时的版本，保障应用程序的可用性。
-<span class="tips">**小窍门:** 使用`mico --help`可以列出所有MiCO CLI所支持的指令，特定某一个指令的帮助可以使用`mico <command> --help`。</span>
+除了以上基本的工作流，MiCO Cube针对长期的开发和维护，提供了额外的版本控制功能。它可以基于版本库进行选择性的升级，使得您的应用程序做包含的MiCO OS和其他组件在持续的更新中仍然能够维持开发时的版本，保障应用程序的可用性。
+<span class="tips">**小窍门:** 使用`mico --help`可以列出所有MiCO Cube所支持的指令，特定某一个指令的帮助可以使用`mico <command> --help`。</span>
 
 ## 安装
 
-MiCO CLI支持Windows, Linux和macOS。
+MiCO Cube支持Windows, Linux和macOS。
 
 ### 要求
 
-* **Python** - MiCO CLI 是一个Python脚本，所以您需要在系统中安装Python。MiCO CLI在[Python version 2.7.13 ](https://www.python.org/downloads/release/python-2713/)下开发和测试. 不兼容Python 3。
+* **Python** - MiCO Cube 是一个Python脚本，所以您需要在系统中安装Python。MiCO Cube在[Python version 2.7.13 ](https://www.python.org/downloads/release/python-2713/)下开发和测试. 不兼容Python 3。
     
     <span class="tips">**注意:** Python的可执行文件目录(`Python`)需要添加到系统的PATH环境变量中，在Python安装时指定。</span>
 
-* **Git or Mercurial** - MiCO CLI 支持Git和Mercurial两种, 任选其一安装即可:
+* **Git or Mercurial** - MiCO Cube 支持Git和Mercurial两种, 任选其一安装即可:
     * [Git](https://git-scm.com/) - 版本 1.9.5 及以上。
     * [Mercurial](https://www.mercurial-scm.org/) - 版本 2.2.2 及以上。
 
     <span class="tips">**注意:** Git和Mercurial的可执行文件目录需要添加到系统的PATH环境变量中。</span>
 
-* **MiCoder Tools or MiCoder IDE** - MiCO CLI 调用MiCO OS中的脚本来完成诸如编译，下载，调试等各项功能. 这些脚本的运行需要用到MiCoder Tools，您可以直接下载MiCoder Tools或者安装包含了MiCider Tools的MiCoder IDE：
+* **MiCoder Tools or MiCoder IDE** - MiCO Cube 调用MiCO OS中的脚本来完成诸如编译，下载，调试等各项功能. 这些脚本的运行需要用到MiCoder Tools，您可以直接下载MiCoder Tools或者安装包含了MiCider Tools的MiCoder IDE：
     * MiCoder Tools - 版本1.1及以上。
         * [MiCoder Tools for  Windows 32bit](http://7xnbsm.com1.z0.glb.clouddn.com/MiCoder_v1.1.Win32.zip)
         * [MiCoder Tools for  macOS 32bit](http://7xnbsm.com1.z0.glb.clouddn.com/MiCoder_v1.1.macOS.tar.gz)
@@ -67,23 +70,23 @@ MiCO CLI支持Windows, Linux和macOS。
         * [MiCoder IDE macOS Installer](http://ok0noocp1.bkt.clouddn.com/MiCoder_IDE_1_2_macOS.pkg) (macOS)
         * [MiCoder IDE Linux Installer]()(准备中)
 
-### 安装MiCO CLI
+### 安装MiCO Cube
 
-您可以从代码仓库中获取开发中的MiCO CLI [https://code.aliyun.com/mico/mico-cli](https://code.aliyun.com/mico/mico-cli):
+您可以从代码仓库中获取开发中的MiCO Cube [https://code.aliyun.com/mico/mico-cube](https://code.aliyun.com/mico/mico-cube):
 ```
-$ git clone https://code.aliyun.com/mico/mico-cli.git
+$ git clone https://code.aliyun.com/mico/mico-cube.git
 ```
-克隆完成后，通过以下命令安装MiCO CLI:
+克隆完成后，通过以下命令安装MiCO Cube:
 ```
 $ python setup.py install
 ```
 在Linux和Mac上, 需要加上`sudo`获得安装权限.
 
-### 升级MiCO CLI
-MiCO CLI安装完成后，可以通过`mico upgrade`命令来升级MiCO CLI的版本。
+### 升级MiCO Cube
+MiCO Cube安装完成后，可以通过`mico upgrade`命令来升级MiCO Cube的版本。
 ```
 $ mico upgrade
-A new veriosn of mico-cli is avaliable, downloading...
+A new veriosn of mico-cube is avaliable, downloading...
 Download completed, installing...
 Install completed
 ```
@@ -92,24 +95,24 @@ Install completed
 
 ## 写在最前: 了解工作交换区和项目根目录
 
-MiCO CLI和Git，Mercurial等其命令行工具一样，使用当前路径作为工作交换区。所以当您执行任何MiCO CLI命令之前，需要首先将当前路径切换到包含需要操作的代码目录。例如，如果您需要升级你的 ``mico-example-program``项目中的MiCO OS的源代码：
+MiCO Cube和Git，Mercurial等其命令行工具一样，使用当前路径作为工作交换区。所以当您执行任何MiCO Cube命令之前，需要首先将当前路径切换到包含需要操作的代码目录。例如，如果您需要升级你的 ``mico-example-program``项目中的MiCO OS的源代码：
 ```
 $ cd mico-example-program
 $ cd mico-os
 $ mico update master   # This will update "mico-os", not "mico-example-program"
 ```
-大量的MiCO CLI功能需要一个基于版本控制 [Git](https://git-scm.com/) 或者 [Mercurial](https://www.mercurial-scm.org/) 的项目根目录. 他使得整个项目以及包含的组件能够自由地切换版本，管理历史记录，与版本库同步，与其他开发者共享等等。MiCO OS也是包含版本管理的开源项目，允许各个开发者向MiCO OS贡献代码。
+大量的MiCO Cube功能需要一个基于版本控制 [Git](https://git-scm.com/) 或者 [Mercurial](https://www.mercurial-scm.org/) 的项目根目录. 他使得整个项目以及包含的组件能够自由地切换版本，管理历史记录，与版本库同步，与其他开发者共享等等。MiCO OS也是包含版本管理的开源项目，允许各个开发者向MiCO OS贡献代码。
 
-<span class="warnings">**注意**: MiCO CLI 在以`.component` 为后缀的文件（例如`lib_name.component`）中保存依赖组件的链接信息; 以`.code` 为后缀的文件（例如`name_src.codes`）中保存可选依赖组件的链接信息. 这些文件都是可读的文本文件，但是我们强烈建议不要手动修改文件的内容，而是使用MiCO CLI的相应命令来自动生成和修改，例如：`$ mico sync`。这些文件我们称之为依赖描述文件。</span>
+<span class="warnings">**注意**: MiCO Cube 在以`.component` 为后缀的文件（例如`lib_name.component`）中保存依赖组件的链接信息; 以`.code` 为后缀的文件（例如`name_src.codes`）中保存可选依赖组件的链接信息. 这些文件都是可读的文本文件，但是我们强烈建议不要手动修改文件的内容，而是使用MiCO Cube的相应命令来自动生成和修改，例如：`$ mico sync`。这些文件我们称之为依赖描述文件。</span>
 
 
 ## 创建和导入项目
 
-MiCO CLI可以创建和导入基于MiCO OS 4的软件项目。
+MiCO Cube可以创建和导入基于MiCO OS 4的软件项目。
 
 ### 创建一个新项目
 
-每当你创建一个新项目，MiCO CLI自动导入最新的 [mico OS](https://code.aliyun.com/mico/mico-os)。 每一个发布都包含了所有组件:  代码和编译调试脚本。
+每当你创建一个新项目，MiCO Cube自动导入最新的 [mico OS](https://code.aliyun.com/mico/mico-os)。 每一个发布都包含了所有组件:  代码和编译调试脚本。
 
 接下来让我们来创建一个新的项目 (命名为`mico-os-program`):
 
@@ -151,7 +154,7 @@ $ mico import https://code.aliyun.com/mico/helloworld.git
 $ cd helloworld
 ```
 
-如果你在"import"命令中不指定完整的路径，MiCO CLI会自动加上默认的路径前缀 (https://code.aliyun.com/mico) 。例如，以下命令:
+如果你在"import"命令中不指定完整的路径，MiCO Cube会自动加上默认的路径前缀 (https://code.aliyun.com/mico) 。例如，以下命令:
  
 ```
 $ mico import helloworld
@@ -163,7 +166,7 @@ $ mico import helloworld
 $ mico import https://code.aliyun.com/mico/helloworld.git
 ```
 
-### 从一个现有的 Git 或 GitHub 克隆导入
+### 从一个现有的 Git 仓库克隆导入
 
 如果你在工作区中手动克隆了一个Git版本库，现有想要添加所有丢失的依赖组件。可以使用 `deploy` 命令：
 
@@ -182,7 +185,7 @@ $ mico new .
 
 在编写MiCO代码时，常常需要在应用程序中添加另一个组件（依赖），或者移除一个现有的组件。
 
-MiCO CLI添加和删除功能不等同于``hg``, ``git``版本管理软件的内置功能，而是针对MiCO项目的特点进行了改造：
+MiCO Cube添加和删除功能不等同于``hg``, ``git``版本管理软件的内置功能，而是针对MiCO项目的特点进行了改造：
 
 * 将新的组件添加到项目中不等同于从版本库中克隆一个仓库，所以不要使用 `hg` 或 `git` 命令，而要使用 `mico add` 来添加组件。它可以保证所有的依赖（组件以及子组件）都能被同时生成出来。
 * 移除一个组件也不仅仅是删除这个组件目录 - 依赖描述文件（`.component`）也需要删除和升级。使用 `mico remove` 命令来移除组件，而不要简单地使用 `rm` 命令。
@@ -213,7 +216,7 @@ $ mico remove Lib_aws
 
 ### 选择MiCoder Tools
 
-完成项目创建和导入后，你需要为MiCO CLI设置MiCoder Tools的路径，以便MiCO CLI调用这些工具来编译MiCO项目。
+完成项目创建和导入后，你需要为MiCO Cube设置MiCoder Tools的路径，以便MiCO Cube调用这些工具来编译MiCO项目。
 
 你可以通过以下命令来设置MiCoder Tools的路径：
 
@@ -222,9 +225,9 @@ $ mico config --global MICODER ~/MiCO_SDK/MiCO/MiCoder
 [mico] /Users/william/MiCO_SDK/MiCO/MiCoder now set as default MICODER in program "helloworld"
 ```
 
-`-G` 或 `--global` 开关可以让MiCO CLI设置一个全局的参数，而不是针对当前项目的私有参数。
+`-G` 或 `--global` 开关可以让MiCO Cube设置一个全局的参数，而不是针对当前项目的私有参数。
 
-你可以通过下面的命令查看 MiCO CLI 的有效配置参数：
+你可以通过下面的命令查看 MiCO Cube 的有效配置参数：
 
 ```
 $ mico config --list
@@ -299,7 +302,7 @@ Making .openocd_cfg
 
 ## 导出到 MiCoder IDE
 
-MiCoder IDE可以导入MiCO项目，这样不仅可以在图形化界面下编写代码，还可以很方便地调试。MiCO CLI会自动在项目根目录下生成MiCoder IDE的工程文件(`.project` 和 `.cproject`) ，然后你随时可以用MiCoder IDE导入当前项目。
+MiCoder IDE可以导入MiCO项目，这样不仅可以在图形化界面下编写代码，还可以很方便地调试。MiCO Cube会自动在项目根目录下生成MiCoder IDE的工程文件(`.project` 和 `.cproject`) ，然后你随时可以用MiCoder IDE导入当前项目。
 
 1. 启动 MiCoder IDE。
 1. 导入MiCoder工程。 (点击 File > Import, 选择 General > Existing Projects into Workspace)
@@ -374,7 +377,7 @@ $ git remote set-url --push origin https://code.aliyun.com/william/repo-fork.git
 
 这样，每次你使用`git`来提交或者推送，或是使用 `mico publish`，新的版本将会推送到你的派生仓库。你仍然可以从原始仓库中通过 `mico update` 或 `git pull`更新版本。如果你希望从你的衍生仓库拉取版本，可以使用`git pull https://code.aliyun.com/william/repo-fork [branch]`。
 
-通过上面描述的工作流，MiCO CLI 保持了与原始版本库（最终你会提交一个推送请求）的联系，并且记录了你推送到衍生版本库的版本记录。在原始仓库接受您的衍生仓库生成的推送请求（ pull request ）之前，所有记录的版本链接对于其他开发者都是无效的。一旦推送请求被接受，您的衍生仓库中的版本就变成了原始版本库的一部分，版本链接也就生效了。
+通过上面描述的工作流，MiCO Cube 保持了与原始版本库（最终你会提交一个推送请求）的联系，并且记录了你推送到衍生版本库的版本记录。在原始仓库接受您的衍生仓库生成的推送请求（ pull request ）之前，所有记录的版本链接对于其他开发者都是无效的。一旦推送请求被接受，您的衍生仓库中的版本就变成了原始版本库的一部分，版本链接也就生效了。
 
 
 ## 升级项目和组件
@@ -391,13 +394,13 @@ $ git remote set-url --push origin https://code.aliyun.com/william/repo-fork.git
 * 更新并保留本地的改动 - *肮脏* 升级。
 * 更新并删除本地的改动 - *干净* 升级。
 
-和其他的MiCO CLI命令一行，`mico update` 命令使用当前目录作为工作交换区，所以在执行`mico update` 之前，应首先将当前的工作目录切换到需要更新的版本库目录。例如，如果你需要更新mico-os，先使用 `cd mico-os` 。
+和其他的MiCO Cube命令一行，`mico update` 命令使用当前目录作为工作交换区，所以在执行`mico update` 之前，应首先将当前的工作目录切换到需要更新的版本库目录。例如，如果你需要更新mico-os，先使用 `cd mico-os` 。
 
 <span class="tips">**Tip: 同步组件链接:** 在触发更新之前，你可能需要同步您之前对项目架构所做的改动，``mico sync`` 命令可以自动更新必须的组件依赖描述文件，并且删除无效的描述文件。</span>
 
 ### 防止覆盖本地改动
 
-如果在执行升级时，如果本地的改动会被覆盖， `update` 命令会直接报错。这是MiCO CLI的设计初衷，可以防止任何本地未提交的改动被覆盖，从而丢失代码。所以在升级时如果出错，看一下本地的改动（提交改动，或者使用下面的选项），然后重新运行`update`。
+如果在执行升级时，如果本地的改动会被覆盖， `update` 命令会直接报错。这是MiCO Cube的设计初衷，可以防止任何本地未提交的改动被覆盖，从而丢失代码。所以在升级时如果出错，看一下本地的改动（提交改动，或者使用下面的选项），然后重新运行`update`。
 
 ### 升级到远端版本
 
@@ -418,7 +421,7 @@ ___升级组件___
 
 ### 升级示例
 
-以下示例帮助你理解MiCO CLI的各种升级选项。
+以下示例帮助你理解MiCO Cube的各种升级选项。
 
 **案例 1: 我要升级一个项目或者组件到指定的或当前分支的最新版本**
 
@@ -433,7 +436,7 @@ __我需要一个干净的升级（丢弃所有本地未提交的改动）__
 
 在 `mico update` 命令中指定另一个远程分支，仅仅将这个分支check out出来，而不会合并或者fast-forward。你也可以使用 `mico update`命令，不加参数来获得远程仓库中的最新版本并与本地版本进行合并（fast-forward）。“mico update”和`git pull`等价。
 
-<span class="warnings">**Warning**: `--clean` 告诉MiCO CLI升级项目或者组件以及他们的依赖项，并且覆盖所有本地的改动。这个操纵无法复原，所以要谨慎执行。</span>
+<span class="warnings">**Warning**: `--clean` 告诉MiCO Cube升级项目或者组件以及他们的依赖项，并且覆盖所有本地的改动。这个操纵无法复原，所以要谨慎执行。</span>
 
 **案例 2: 我要升级一个项目或者组件到指定版本或者标签**
  
@@ -462,4 +465,4 @@ __合并升级选项__
 
 * `mico update --clean --clean-deps --clean-files` - 升级当前项目和组件以及他们的依赖项，丢弃所有本地未发布的版本库，丢弃所有未提交的改动，删除所有未跟踪或者忽略的文件。这个现象丢弃了所有你在本地项目和组件中所做的改动，恢复项目的布局。
 
-* `mico update --clean --ignore` - 升级当前项目和组件以及他们的依赖项，但是忽略所有的本地未提交的版本库。MiCO CLI尽可能地从远端公共仓库获取新的版本。
+* `mico update --clean --ignore` - 升级当前项目和组件以及他们的依赖项，但是忽略所有的本地未提交的版本库。MiCO Cube尽可能地从远端公共仓库获取新的版本。
