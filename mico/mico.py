@@ -1942,15 +1942,16 @@ def deploy(ignore=False, depth=None, protocol=None, top=True):
 #            program.update_tools('.temp')
 
 # Source command
-@subcommand('source',
-    dict(name='name', help='Destination library name without suffix'),
+@subcommand('codes',
+    dict(name='name', help='Destination component name without suffix'),
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
-    help='Get the source code of one library',
+    help='Import the optional component from the remote repository',
     description=(
-        "Get the source code of one library"))
-def source(name, ignore=False, depth=None, protocol=None, top=True):
+        "Import optional component defined by .codes file.\n"
+        "name of the .codes file should be specified ."))
+def codes(name, ignore=False, depth=None, protocol=None, top=True):
     repo = Repo.fromcode(os.path.join(os.getcwd(), name+'.codes'))
 
     if os.path.isdir(repo.path):
