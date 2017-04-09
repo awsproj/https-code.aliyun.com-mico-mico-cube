@@ -2521,7 +2521,7 @@ def detect():
 
 # Make command
 @subcommand('make',
-    help='Make mico program/component\n\n',
+    help='Make mico program/component',
     description=(
         "Make mico program/component."))
 def make():
@@ -2542,7 +2542,45 @@ def make():
     host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
     make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, '' if '-C' in make_args else '-f mico-os/makefiles/Makefile', make_args])
     os.system(make_cmd_str)
+
+# Make command
+@subcommand('makelib',
+    help='Compile static library for current directory\n\n',
+    description=(
+        "Compile static library for current directory."))
+def makelib():
+    cwd = os.getcwd()
+    src_files = []
+    inc_dirs = ['.']
+    obj_files = []
+
+    for root, dirs, files in os.walk(cwd):
+        root = root[len(cwd)+1:]
+        for file in files:
+            if file.endswith('.c'):
+                src_files.append(os.path.join(root,file))
+        for dir in dirs:
+            inc_dirs.append(os.path.join(root,dir))
+
+    micoder_dir = get_micoder_dir()
+    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
+    gcc_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-gcc')
+    ar_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-ar')
+
+    gcc_inc_str = '-I'+' -I'.join(inc_dirs)
+    gcc_mcu_str = '-mthumb -mcpu=cortex-m3'
+    gcc_opt_str = '-c'
+
+    for src_file in src_files:
+        obj_file = src_file.replace('.c','.o')
+        obj_files.append(obj_file)
+        os.system(' '.join((gcc_cmd_str,gcc_mcu_str,gcc_opt_str,gcc_inc_str,'-o',obj_file,src_file)))
     
+    os.system(' '.join((ar_cmd_str,'-r lib.a',' '.join(obj_files))))
+
+    for obj_file in obj_files:
+        os.remove(obj_file)
+
 # Generic config command
 @subcommand('config',
     dict(name='var', nargs='?', help='Variable name. E.g. "micoder", "protocol"'),
@@ -2550,7 +2588,7 @@ def make():
     dict(name=['-G', '--global'], dest='global_cfg', action='store_true', help='Use global settings, not local'),
     dict(name=['-U', '--unset'], dest='unset', action='store_true', help='Unset the specified variable.'),
     dict(name=['-L', '--list'], dest='list_config', action='store_true', help='List mico tool configuration.'),
-    help='Tool configuration',
+    help='Tool configuration\n\n',
     description=(
         "Gets, sets or unsets mico tool configuration options.\n"
         "Options can be global (via the --global switch) or local (per program)\n"
@@ -2616,43 +2654,6 @@ def config_(var=None, value=None, global_cfg=False, unset=False, list_config=Fal
     else:
         subcommands['config'].error("too few arguments")
 
-# Make command
-@subcommand('lib',
-    help='Compile library in current directory\n\n',
-    description=(
-        "Compile library in current directory."))
-def lib():
-    cwd = os.getcwd()
-    src_files = []
-    inc_dirs = ['.']
-    obj_files = []
-
-    for root, dirs, files in os.walk(cwd):
-        root = root[len(cwd)+1:]
-        for file in files:
-            if file.endswith('.c'):
-                src_files.append(os.path.join(root,file))
-        for dir in dirs:
-            inc_dirs.append(os.path.join(root,dir))
-
-    micoder_dir = get_micoder_dir()
-    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
-    gcc_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-gcc')
-    ar_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-ar')
-
-    gcc_inc_str = '-I'+' -I'.join(inc_dirs)
-    gcc_mcu_str = '-mthumb -mcpu=cortex-m3'
-    gcc_opt_str = '-c'
-
-    for src_file in src_files:
-        obj_file = src_file.replace('.c','.o')
-        obj_files.append(obj_file)
-        os.system(' '.join((gcc_cmd_str,gcc_mcu_str,gcc_opt_str,gcc_inc_str,'-o',obj_file,src_file)))
-    
-    os.system(' '.join((ar_cmd_str,'-r lib.a',' '.join(obj_files))))
-
-    for obj_file in obj_files:
-        os.remove(obj_file)
 
 '''
 # Build system and exporters
