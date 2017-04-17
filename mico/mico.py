@@ -1616,6 +1616,22 @@ def get_micoder_dir():
         error('Can not find MiCoder!')
     return micoder_dir
 
+def _run_make(arg_list):
+    micoder_dir = get_micoder_dir()
+
+    # Decide which make to use according to the platform system 
+    win_make = os.path.join(micoder_dir,'cmd/Win32/make.exe')
+    mac_make = os.path.join(micoder_dir,'cmd/OSX/make')
+    linux_make = os.path.join(micoder_dir,'cmd/Linux64/make')
+    make_cmd = mac_make if sys.platform == 'darwin' else (linux_make if sys.platform == 'linux' else (win_make if sys.platform == 'win32' else None))
+    if not make_cmd:
+        error('Unsupported system!')
+
+    # Run make command
+    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
+    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir] + list(arg_list))
+    os.system(make_cmd_str)
+
 # Subparser handling
 parser = argparse.ArgumentParser(prog='mico',
     description="Code management tool for MXCHIP MiCO OS - https://code.aliyun.com/mico/mico-os\nversion %s\n\nUse 'mico <command> -h|--help' for detailed help.\nOnline manual and guide available at https://code.aliyun.com/mico/mico-cube" % ver,
@@ -2526,61 +2542,29 @@ def detect():
     description=(
         "Make mico program/component."))
 def make():
-    # Get the make arguments
+   # Get the make arguments
     make_args = ' '.join(sys.argv[2:])
-
-    micoder_dir = get_micoder_dir()
-
-    # Decide which make to use according to the platform system 
-    win_make = os.path.join(micoder_dir,'cmd/Win32/make.exe')
-    mac_make = os.path.join(micoder_dir,'cmd/OSX/make')
-    linux_make = os.path.join(micoder_dir,'cmd/Linux64/make')
-    make_cmd = mac_make if sys.platform == 'darwin' else (linux_make if sys.platform == 'linux' else (win_make if sys.platform == 'win32' else None))
-    if not make_cmd:
-        error('Unsupported system!')
-
-    # Run make command
-    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
-    make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir, '' if '-C' in make_args else '-f mico-os/makefiles/Makefile', make_args])
-    os.system(make_cmd_str)
+    _run_make(['-f mico-os/makefiles/Makefile',make_args])
 
 # Make command
 @subcommand('makelib',
-    help='Compile static library for current directory\n\n',
+    dict(name='path', nargs='?', help='Library directory path.'),
+    dict(name=['-N', '--new'], dest='new', action='store_true', help='Create a library configure makefile .'),
+    help='Compile static library\n\n',
     description=(
-        "Compile static library for current directory."))
-def makelib():
-    cwd = os.getcwd()
-    src_files = []
-    inc_dirs = ['.']
-    obj_files = []
+        "Compile static library."))
+def makelib(path, new=False):
+    if new:
+        root_dir = Program().path
+        with open(os.path.join(root_dir,'mico-os/template/makefiles/mico_library_makefile/template.mk'), 'r') as f:
+            content = f.read()
+        with open(os.path.join(root_dir, path, os.path.basename(path)+'_src.mk'), 'w') as f:
+            f.write(content.replace('template', os.path.basename(path)))
+        return
 
-    for root, dirs, files in os.walk(cwd):
-        root = root[len(cwd)+1:]
-        for file in files:
-            if file.endswith('.c'):
-                src_files.append(os.path.join(root,file))
-        for dir in dirs:
-            inc_dirs.append(os.path.join(root,dir))
-
-    micoder_dir = get_micoder_dir()
-    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
-    gcc_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-gcc')
-    ar_cmd_str = os.path.join(micoder_dir,'compiler/arm-none-eabi-5_4-2016q2-20160622',host_os,'bin/arm-none-eabi-ar')
-
-    gcc_inc_str = '-I'+' -I'.join(inc_dirs)
-    gcc_mcu_str = '-mthumb -mcpu=cortex-m3'
-    gcc_opt_str = '-c'
-
-    for src_file in src_files:
-        obj_file = src_file.replace('.c','.o')
-        obj_files.append(obj_file)
-        os.system(' '.join((gcc_cmd_str,gcc_mcu_str,gcc_opt_str,gcc_inc_str,'-o',obj_file,src_file)))
-    
-    os.system(' '.join((ar_cmd_str,'-r lib.a',' '.join(obj_files))))
-
-    for obj_file in obj_files:
-        os.remove(obj_file)
+    host_arch = ['Cortex-M3', 'Cortex-M4', 'Cortex-M4F']
+    for arch in host_arch:
+        _run_make(['LIB_DIR='+path, 'HOST_ARCH='+arch, '-f mico-os/makefiles/mico_library_makefile.mk'])
 
 # Generic config command
 @subcommand('config',
