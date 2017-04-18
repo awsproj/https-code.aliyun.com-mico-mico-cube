@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.3'
+ver = '1.0.4'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -2676,26 +2676,7 @@ def help_():
 @subcommand('upgrade',
     help='Upgrade mico-cube')
 def upgrade():
-	path = os.path.expanduser('~/.mico/.rev')
-	url = 'https://code.aliyun.com/mico/mico-cube.git'
-	if not os.path.isdir(path):
-		repo = Repo.fromurl(url, path)
-		if not repo.clone(repo.url, repo.path, repo.rev, None, None):
-			error("Unable to clone repository (%s)" % url, 1)
-
-	with cd(path):
-		lines = pquery([git_cmd, 'ls-remote','-t','-q']).strip().splitlines()
-		m = re.match(r'(.+?)refs/tags/v(\d.\d.\d)', lines[-1])
-		if m:
-			remote_tag = m.group(2)
-			if LooseVersion(ver) < LooseVersion(remote_tag):
-				print 'A new veriosn of mico-cube is avaliable, downloading...'
-				pquery([git_cmd, 'pull'])
-				print 'Download completed, installing...'
-				pquery(['python','setup.py','install'])
-				print 'Install completed'
-				return True
-	return False
+    popen(['pip','install','--upgrade','mico-cube'])
 
 def main():
     global verbose, very_verbose, remainder, cwd_root
