@@ -77,27 +77,30 @@ Windows, Linux and Mac OS X support MiCO Cube.
 
 ### Installing MiCO Cube
 
-You can get the development version of MiCO Cube by cloning the development repository [https://code.aliyun.com/mico/mico-cube](https://code.aliyun.com/mico/mico-cube):
-
+You can use command `pip install mico-cube` to install MiCO Cube:
 ```
-$ git clone https://code.aliyun.com/mico/mico-cube.git
+$pip install mico-cube
+Collecting mico-cube
+  Downloading mico-cube-1.0.6.tar.gz
+Installing collected packages: mico-cube
+  Running setup.py install for mico-cube ... done
+Successfully installed mico-cube-1.0.6
 ```
-
-Once cloned, you can install MiCO Cube as a python package:
-
-```
-$ python setup.py install
-```
-
 On Linux or Mac, you may need to run with `sudo`.
 
 ### Upgrading MiCO Cube
-Once MiCO Cube installed，you can use command `mico upgrade` to upgrade MiCO Cube to latest version.
+
+Once MiCO Cube installed，you can use command `pip install --upgrade mico-cube` to upgrade MiCO Cube to latest version.
 ```
-$ mico upgrade
-A new veriosn of mico-cube is avaliable, downloading...
-Download completed, installing...
-Install completed
+$pip install --upgrade mico-cube
+Collecting mico-cube
+  Downloading mico-cube-1.0.6.tar.gz
+Installing collected packages: mico-cube
+  Found existing installation: mico-cube 1.0.0
+    Uninstalling mico-cube-1.0.0:
+      Successfully uninstalled mico-cube-1.0.0
+  Running setup.py install for mico-cube ... done
+Successfully installed mico-cube-1.0.6
 ```
 On Linux or Mac, you may need to run with `sudo`.
 

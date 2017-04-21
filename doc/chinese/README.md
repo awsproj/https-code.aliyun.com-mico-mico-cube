@@ -72,23 +72,30 @@ MiCO Cube支持Windows, Linux和macOS。
 
 ### 安装MiCO Cube
 
-您可以从代码仓库中获取开发中的MiCO Cube [https://code.aliyun.com/mico/mico-cube](https://code.aliyun.com/mico/mico-cube):
+您可以从执行`pip install mico-cube`命令来安装MiCO Cube:
 ```
-$ git clone https://code.aliyun.com/mico/mico-cube.git
-```
-克隆完成后，通过以下命令安装MiCO Cube:
-```
-$ python setup.py install
+$pip install mico-cube
+Collecting mico-cube
+  Downloading mico-cube-1.0.6.tar.gz
+Installing collected packages: mico-cube
+  Running setup.py install for mico-cube ... done
+Successfully installed mico-cube-1.0.6
 ```
 在Linux和Mac上, 需要加上`sudo`获得安装权限.
 
 ### 升级MiCO Cube
-MiCO Cube安装完成后，可以通过`mico upgrade`命令来升级MiCO Cube的版本。
+
+MiCO Cube安装完成后，可以通过`pip install --upgrade mico-cube`命令来升级MiCO Cube的版本。
 ```
-$ mico upgrade
-A new veriosn of mico-cube is avaliable, downloading...
-Download completed, installing...
-Install completed
+$pip install --upgrade mico-cube
+Collecting mico-cube
+  Downloading mico-cube-1.0.6.tar.gz
+Installing collected packages: mico-cube
+  Found existing installation: mico-cube 1.0.0
+    Uninstalling mico-cube-1.0.0:
+      Successfully uninstalled mico-cube-1.0.0
+  Running setup.py install for mico-cube ... done
+Successfully installed mico-cube-1.0.6
 ```
 在Linux和Mac上, 需要加上`sudo`获得安装权限.
 
