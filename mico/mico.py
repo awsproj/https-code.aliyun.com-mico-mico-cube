@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.4'
+ver = '1.0.6'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -2661,11 +2661,6 @@ def toolchain_(name=None, global_cfg=False, supported=False):
     help='This help screen')
 def help_():
     return parser.print_help()
-
-@subcommand('upgrade',
-    help='Upgrade mico-cube')
-def upgrade():
-    popen(['pip','install','--upgrade','mico-cube'])
 
 def main():
     global verbose, very_verbose, remainder, cwd_root
