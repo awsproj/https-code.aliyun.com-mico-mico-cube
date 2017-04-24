@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.6'
+ver = '1.0.7'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -1957,15 +1957,17 @@ def deploy(ignore=False, depth=None, protocol=None, top=True):
         "Import optional component defined by .codes file.\n"
         "name of the .codes file should be specified ."))
 def codes(name, ignore=False, depth=None, protocol=None, top=True):
-    repo = Repo.fromcode(os.path.join(os.getcwd(), name+'.codes'))
+    repo = Repo.fromrepo()
+    code = Repo.fromcode(os.path.join(os.getcwd(), name+'.codes'))
 
-    if os.path.isdir(repo.path):
-        if repo.check_repo():
-            with cd(repo.path):
-                update(repo.rev, ignore=ignore, depth=depth, protocol=protocol, top=False)
+    if os.path.isdir(code.path):
+        if code.check_repo():
+            with cd(code.path):
+                update(code.rev, ignore=ignore, depth=depth, protocol=protocol, top=False)
     else:
-        import_(repo.fullurl, repo.path, ignore=ignore, depth=depth, protocol=protocol, top=False)
-        repo.ignore(relpath(repo.path, repo.path))
+        import_(code.fullurl, code.path, ignore=ignore, depth=depth, protocol=protocol, top=False)
+        print '>>>>',repo.path,code.path
+        repo.ignore(relpath(repo.path, code.path))
             
 
 # Publish command
