@@ -102,13 +102,15 @@ Successfully installed mico-cube-1.0.6
 
 ## 写在最前: 了解工作交换区和项目根目录
 
-MiCO Cube和Git，Mercurial等其命令行工具一样，使用当前路径作为工作交换区。所以当您执行任何MiCO Cube命令之前，需要首先将当前路径切换到包含需要操作的代码目录。例如，如果您需要升级你的 ``mico-example-program``项目中的MiCO OS的源代码：
+MiCO Cube和Git，Mercurial等其命令行工具一样，使用当前路径作为**工作交换区**。所以当您执行任何MiCO Cube的版本控制命令之前，需要首先将当前路径切换到包含需要操作的代码目录。例如，如果您需要升级你的 ``mico-example-program``项目中的MiCO OS的源代码：
 ```
 $ cd mico-example-program
 $ cd mico-os
 $ mico update master   # This will update "mico-os", not "mico-example-program"
 ```
-大量的MiCO Cube功能需要一个基于版本控制 [Git](https://git-scm.com/) 或者 [Mercurial](https://www.mercurial-scm.org/) 的项目根目录. 他使得整个项目以及包含的组件能够自由地切换版本，管理历史记录，与版本库同步，与其他开发者共享等等。MiCO OS也是包含版本管理的开源项目，允许各个开发者向MiCO OS贡献代码。
+MiCO OS也是包含版本管理的开源项目，允许各个开发者向MiCO OS贡献代码。
+
+MiCO项目开发时，需要实现对整个项目以及包含的组件能够自由地切换版本，管理历史记录，与版本库同步，与其他开发者共享等等。因此需要一个基于版本控制 [Git](https://git-scm.com/) 或者 [Mercurial](https://www.mercurial-scm.org/) 的**项目根目录**。此外，项目根目录下保存了项目的一些配置信息，所以在编译MiCO项目时，应将路径切换到项目根目录下。使用`mico new`，`mico import`命令会自动将源代码根目录设置成项目根目录。而如果从Git仓库上直接下载的源代码，则应该进入源代码路径，并且执行`mico new .`将当前目录设置成项目根目录。
 
 <span class="warnings">**注意**: MiCO Cube 在以`.component` 为后缀的文件（例如`lib_name.component`）中保存依赖组件的链接信息; 以`.code` 为后缀的文件（例如`name_src.codes`）中保存可选依赖组件的链接信息. 这些文件都是可读的文本文件，但是我们强烈建议不要手动修改文件的内容，而是使用MiCO Cube的相应命令来自动生成和修改，例如：`$ mico sync`。这些文件我们称之为依赖描述文件。</span>
 
