@@ -322,9 +322,11 @@ The compiled binary, ELF image, memory usage and link statistics can be found in
 
 ### Compiling static libraries
 Use the `mico makelib` command to build a static library of your own code.
+
 The arguments for *mico makelib* are:
-*`[--new]`for generating the prerequisite, `.mk` file, of compiling static libraries.
-*`<source>`to select the directory of the source.
+
+* `[--new]`for generating the prerequisite, `.mk` file, of compiling static libraries.
+* `<source>`to select the directory of the source.
 
 **Example:**
 * 1. Assuming that the project directory is `helloworld`, the code, `mystaticlib.h` and `mystaticlib.c`, to be compiled is in directory `helloworld\mico-os\staticlib`. Open `mico cube`, change working directory to `helloworld`, run command `mico makelib --new`. A `.mk` file named `staticlib_src` will be created in directory `helloworld\mico-os\staticlib`.
