@@ -307,6 +307,59 @@ Making .openocd_cfg
 
 
 ### 编译静态库
+使用`mico makelib`命令来将您自己的代码编译成静态库。
+*mico makelib*编译参数如下：
+* `[--new]`用于生成静态库编译依赖`.mk`文件。
+* `<source>`源文件所在目录。
+
+**案例：**
+* 1. 假设项目根目录为`hellworld`，在`helloworld\mico-os\staticlib`下有需要编译成静态库的头文件`mystaticlib.h`和源文件`mystaticlib.c`。 运行`mico cube`并将当前工作目录定位到`helloworld`，运行`mico makelib --new`。在`helloworld\mico-os\staticlib`目录下会自动生成一个名为`staticlib_src`的`.mk`文件。
+
+```
+$ mico makelib --new mico-os\staticlib
+```
+
+* 2. 在这个`.mk`中添加相应的参数、定义及文件路径，本例中仅添加了头文件和源文件路径，内容如下：
+
+```
+#
+#  UNPUBLISHED PROPRIETARY SOURCE CODE
+#  Copyright (c) 2016 MXCHIP Inc.
+#
+#  The contents of this file may not be disclosed to third parties, copied or
+#  duplicated in any form, in whole or in part, without the prior written
+#  permission of MXCHIP Corporation.
+#
+
+NAME := staticlib
+
+# Add compiler flags here
+$(NAME)_CFLAGS :=
+
+# Add definations here
+$(NAME)_DEFINES :=
+
+# Add includes path here, should be realtive path to current directory
+$(NAME)_INCLUDES := ./mystaticlib.h
+
+# Add sources path here, should be realtive path to current directory
+$(NAME)_SOURCES := ./mystaticlib.c
+```
+
+* 3. 在`mico cube`中运行`mico makelib`命令，在目录`helloworld\mico-os`下将会生成所编译的静态库文件。
+
+```
+$ mico makelib mico-os\mystaticlib
+
+Compiling mico-os\mystaticlib/./mystaticlib.c
+Make staticlib.Cortex-M3.GCC.release.a DONE
+
+Compiling mico-os\mystaticlib/./mystaticlib.c
+Make staticlib.Cortex-M4.GCC.release.a DONE
+
+Compiling mico-os\mystaticlib/./mystaticlib.c
+Make staticlib.Cortex-M4F.GCC.release.a DONE
+```
 
 
 ## 导出到 MiCoder IDE

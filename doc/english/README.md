@@ -321,6 +321,59 @@ The compiled binary, ELF image, memory usage and link statistics can be found in
 
 
 ### Compiling static libraries
+Use the `mico makelib` command to build a static library of your own code.
+The arguments for *mico makelib* are:
+*`[--new]`for generating the prerequisite, `.mk` file, of compiling static libraries.
+*`<source>`to select the directory of the source.
+
+**Example:**
+* 1. Assuming that the project directory is `helloworld`, the code, `mystaticlib.h` and `mystaticlib.c`, to be compiled is in directory `helloworld\mico-os\staticlib`. Open `mico cube`, change working directory to `helloworld`, run command `mico makelib --new`. A `.mk` file named `staticlib_src` will be created in directory `helloworld\mico-os\staticlib`.
+
+```
+$ mico makelib --new mico-os\staticlib
+```
+
+* 2. Add items -- arguments,definitions and file paths -- to the `.mk` file. In this case, a header file and a source file were added:
+
+```
+#
+#  UNPUBLISHED PROPRIETARY SOURCE CODE
+#  Copyright (c) 2016 MXCHIP Inc.
+#
+#  The contents of this file may not be disclosed to third parties, copied or
+#  duplicated in any form, in whole or in part, without the prior written
+#  permission of MXCHIP Corporation.
+#
+
+NAME := staticlib
+
+# Add compiler flags here
+$(NAME)_CFLAGS :=
+
+# Add definations here
+$(NAME)_DEFINES :=
+
+# Add includes path here, should be realtive path to current directory
+$(NAME)_INCLUDES := ./mystaticlib.h
+
+# Add sources path here, should be realtive path to current directory
+$(NAME)_SOURCES := ./mystaticlib.c
+```
+
+* 3. Run `mico makelib` command in `mico cube`, the static libraries will show in `helloworld\mico-os`.
+
+```
+$ mico makelib mico-os\mystaticlib
+
+Compiling mico-os\mystaticlib/./mystaticlib.c
+Make staticlib.Cortex-M3.GCC.release.a DONE
+
+Compiling mico-os\mystaticlib/./mystaticlib.c
+Make staticlib.Cortex-M4.GCC.release.a DONE
+
+Compiling mico-os\mystaticlib/./mystaticlib.c
+Make staticlib.Cortex-M4F.GCC.release.a DONE
+```
 
 
 ## Exporting to MiCoder IDE
