@@ -308,11 +308,14 @@ Making .openocd_cfg
 
 ### 编译静态库
 使用`mico makelib`命令来将您自己的代码编译成静态库。
+
 *mico makelib*编译参数如下：
+
 * `[--new]`用于生成静态库编译依赖`.mk`文件。
 * `<source>`源文件所在目录。
 
 **案例：**
+
 * 1. 假设项目根目录为`hellworld`，在`helloworld\mico-os\staticlib`下有需要编译成静态库的头文件`mystaticlib.h`和源文件`mystaticlib.c`。 运行`mico cube`并将当前工作目录定位到`helloworld`，运行`mico makelib --new`。在`helloworld\mico-os\staticlib`目录下会自动生成一个名为`staticlib_src`的`.mk`文件。
 
 ```
