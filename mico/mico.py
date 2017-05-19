@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.7'
+ver = '1.0.9'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -1623,12 +1623,12 @@ def _run_make(arg_list):
     win_make = os.path.join(micoder_dir,'cmd/Win32/make.exe')
     mac_make = os.path.join(micoder_dir,'cmd/OSX/make')
     linux_make = os.path.join(micoder_dir,'cmd/Linux64/make')
-    make_cmd = mac_make if sys.platform == 'darwin' else (linux_make if sys.platform == 'linux' else (win_make if sys.platform == 'win32' else None))
+    make_cmd = mac_make if sys.platform == 'darwin' else (linux_make if sys.platform == 'linux2' else (win_make if sys.platform == 'win32' else None))
     if not make_cmd:
         error('Unsupported system!')
 
     # Run make command
-    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux' else 'Win32'
+    host_os = 'OSX' if sys.platform == 'darwin' else 'Linux64' if sys.platform == 'linux2' else 'Win32'
     make_cmd_str = ' '.join([make_cmd, 'HOST_OS='+host_os, 'TOOLS_ROOT='+micoder_dir] + list(arg_list))
     os.system(make_cmd_str)
 
@@ -1884,6 +1884,10 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
         "(GitHub, Bitbucket, mico.org) into an existing program.\n"
         "Use 'mico import <URL>' to import as a program"))
 def add(url, path=None, ignore=False, depth=None, protocol=None, top=True):
+     # translate 'mico-os' to https://code.aliyun.com/mico
+    if not Repo.isurl(url) and not os.path.exists(url):
+        url = mico_base_url+'/'+url+'.git'
+        
     repo = Repo.fromrepo()
 
     lib = Repo.fromurl(url, path)
