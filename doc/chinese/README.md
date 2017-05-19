@@ -343,10 +343,10 @@ $(NAME)_CFLAGS :=
 $(NAME)_DEFINES :=
 
 # Add includes path here, should be realtive path to current directory
-$(NAME)_INCLUDES := ./mystaticlib.h
+$(NAME)_INCLUDES := .
 
 # Add sources path here, should be realtive path to current directory
-$(NAME)_SOURCES := ./mystaticlib.c
+$(NAME)_SOURCES := mystaticlib.c
 ```
 
 * 3. 在`mico cube`中运行`mico makelib`命令，在目录`helloworld\mico-os`下将会生成所编译的静态库文件。

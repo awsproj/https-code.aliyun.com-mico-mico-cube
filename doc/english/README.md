@@ -356,10 +356,10 @@ $(NAME)_CFLAGS :=
 $(NAME)_DEFINES :=
 
 # Add includes path here, should be realtive path to current directory
-$(NAME)_INCLUDES := ./mystaticlib.h
+$(NAME)_INCLUDES := .
 
 # Add sources path here, should be realtive path to current directory
-$(NAME)_SOURCES := ./mystaticlib.c
+$(NAME)_SOURCES := mystaticlib.c
 ```
 
 * 3. Run `mico makelib` command in `mico cube`, the static libraries will show in `helloworld\mico-os`.
