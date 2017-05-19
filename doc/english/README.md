@@ -367,13 +367,13 @@ $(NAME)_SOURCES := mystaticlib.c
 ```
 $ mico makelib mico-os\mystaticlib
 
-Compiling mico-os\mystaticlib/./mystaticlib.c
+Compiling mico-os\mystaticlib/mystaticlib.c
 Make staticlib.Cortex-M3.GCC.release.a DONE
 
-Compiling mico-os\mystaticlib/./mystaticlib.c
+Compiling mico-os\mystaticlib/mystaticlib.c
 Make staticlib.Cortex-M4.GCC.release.a DONE
 
-Compiling mico-os\mystaticlib/./mystaticlib.c
+Compiling mico-os\mystaticlib/mystaticlib.c
 Make staticlib.Cortex-M4F.GCC.release.a DONE
 ```
 
