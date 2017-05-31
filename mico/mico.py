@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.9'
+ver = '1.0.11'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -95,6 +95,7 @@ eclispe_project_dir = 'mico-os/makefiles/eclipse_project'
 # Logging and output
 def log(msg):
     sys.stdout.write(msg)
+    sys.stdout.flush()
 
 def message(msg):
     return "[mico] %s\n" % msg
