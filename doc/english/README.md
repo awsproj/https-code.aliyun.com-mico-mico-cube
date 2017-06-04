@@ -321,62 +321,59 @@ The compiled binary, ELF image, memory usage and link statistics can be found in
 
 
 ### Compiling static libraries
-Use the `mico makelib` command to build a static library of your own code.
+Use the `mico makelib` command to build a static library from your code.
 
-The arguments for *mico makelib* are:
+`mico makelib` arguments:
 
-* `[--new]`for generating the prerequisite, `.mk` file, of compiling static libraries.
-* `<source>`to select the directory of the source.
+* `[--new]`: Generate the compiling decsription file `.mk` file.
+* `<source>`: Select source code directory.
 
-**Example:**
-* 1. Assuming that the project directory is `helloworld`, the code, `mystaticlib.h` and `mystaticlib.c`, to be compiled is in directory `helloworld\mico-os\staticlib`. Open `mico cube`, change working directory to `helloworld`, run command `mico makelib --new`. A `.mk` file named `staticlib_src` will be created in directory `helloworld\mico-os\staticlib`.
+**Steps：**
 
-```
-$ mico makelib --new mico-os\staticlib
-```
+1. Use `mico makelib --new` to generate `.mk` file.
+1. Add compliler parameters, macros, header file searching paths and source codes to `.mk` file.
+1. Use `mico makelib` to generate the static library files.
 
-* 2. Add items -- arguments,definitions and file paths -- to the `.mk` file. In this case, a header file and a source file were added:
+**Example：**
 
-```
-#
-#  UNPUBLISHED PROPRIETARY SOURCE CODE
-#  Copyright (c) 2016 MXCHIP Inc.
-#
-#  The contents of this file may not be disclosed to third parties, copied or
-#  duplicated in any form, in whole or in part, without the prior written
-#  permission of MXCHIP Corporation.
-#
+假设项目根目录为 `hellworld`，在`helloworld/mico-os/staticlib`下有需要编译成静态库的头文件`mystaticlib.h`和源文件`mystaticlib.c`。
 
-NAME := staticlib
+Assuming that the project directory is `helloworld`, we need to build a static library from sources codes in `helloworld\mico-os\staticlib`. `mystaticlib.h` and `mystaticlib.c` is under this directory.
 
-# Add compiler flags here
-$(NAME)_CFLAGS :=
+1. Enter the MiCO project's root: `cd helloworld`。
+1. Run `mico makelib --new mico-os/staticlib`, file "staticlib_src.mk" is automatically generated under "staticlib" directory.
+1. Modify "staticlib_src.mk"
 
-# Add definations here
-$(NAME)_DEFINES :=
+    ```
+    NAME := staticlib
 
-# Add includes path here, should be realtive path to current directory
-$(NAME)_INCLUDES := .
+    # Add compiler flags here
+    $(NAME)_CFLAGS :=
 
-# Add sources path here, should be realtive path to current directory
-$(NAME)_SOURCES := mystaticlib.c
-```
+    # Add definations here
+    $(NAME)_DEFINES :=
 
-* 3. Run `mico makelib` command in `mico cube`, the static libraries will show in `helloworld\mico-os`.
+    # Add includes path here, should be realtive path to current directory
+    $(NAME)_INCLUDES := .
 
-```
-$ mico makelib mico-os\mystaticlib
+    # Add sources path here, should be realtive path to current directory
+    $(NAME)_SOURCES := mystaticlib.c
+    ```
 
-Compiling mico-os\mystaticlib/mystaticlib.c
-Make staticlib.Cortex-M3.GCC.release.a DONE
+1. Run `mico makelib mico-os/staticlib`，to generate the static library files in "helloworld/mico-os".
 
-Compiling mico-os\mystaticlib/mystaticlib.c
-Make staticlib.Cortex-M4.GCC.release.a DONE
+    ```
+    $ mico makelib mico-os/mystaticlib
 
-Compiling mico-os\mystaticlib/mystaticlib.c
-Make staticlib.Cortex-M4F.GCC.release.a DONE
-```
+    Compiling mico-os/mystaticlib/mystaticlib.c
+    Make staticlib.Cortex-M3.GCC.release.a DONE
 
+    Compiling mico-os/mystaticlib/mystaticlib.c
+    Make staticlib.Cortex-M4.GCC.release.a DONE
+
+    Compiling mico-os/mystaticlib/mystaticlib.c
+    Make staticlib.Cortex-M4F.GCC.release.a DONE
+    ```
 
 ## Exporting to MiCoder IDE
 
