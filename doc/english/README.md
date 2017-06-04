@@ -317,6 +317,13 @@ The arguments for *compile* are:
 * `[VERBOSE=1]` (optional) Shows the commands as they are being executed.
 * `[JOBS=<jobs>]` (optional) to control the compile threads on your machine. The default value is 4, which infers the number of threads from the number of cores on your machine. You can use `JOBS=1` to trigger a sequential compile of source code.
 
+Exaples：
+
+* Compile helloworld on board MiCOKit-3165，use：`helloworld@MK3165 JTAG=jlink-swd`
+* Compile helloworld and all related images on MiCOKit-3165, use `helloworld@MK3165 total`
+* Compile and download helloworld and all related images on board MiCOKit3031, use `helloworld@MK3031@moc total download JTAG=jlink-swd`
+* Compile and download helloworld and bootload on board MiCOKit-3080B, use `helloworld@MK3080B@moc total download JTAG=jlink-swd`
+
 The compiled binary, ELF image, memory usage and link statistics can be found in the `build/<target>/binary` subdirectory of your program.、
 
 

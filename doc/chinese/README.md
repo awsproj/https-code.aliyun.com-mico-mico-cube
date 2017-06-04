@@ -303,6 +303,13 @@ Making .openocd_cfg
 * `[VERBOSE=1]` (可选) 显示编译过程中运行的命令。
 * `[JOBS=<jobs>]` (可选) 控制多线程编译，提高编译速度。默认值是 4。可以根据处理器核心的数量来设置这个参数，也可以使用 `JOBS=1` 来执行单线程的顺序编译.
 
+如：
+
+* 编译基于 MiCOKit-3165 的 Helloworld 应用程序，使用命令：`helloworld@MK3165 JTAG=jlink-swd`
+* 编译基于 MiCOKit-3165 的 Helloworld 应用程序和其他相关固件，使用命令：`helloworld@MK3165 total`
+* 编译并且下载基于 MiCOKit-3031 的 Helloworld 应用程序和其他相关固件，使用命令：`helloworld@MK3031@moc total download JTAG=jlink-swd`
+* 编译并且下载基于 MiCOKit-3080B 的 Helloworld 应用程序和其他相关固件，使用命令： `helloworld@MK3080B@moc total download JTAG=jlink-swd`
+
 编译生成的可执行文件，ELF文件，内存使用和链接数据可以在 `build/<target>/binary` 目录下找到。
 
 
