@@ -2558,7 +2558,7 @@ def makelib(path, new=False):
             f.write(content.replace('template', os.path.basename(path)))
         return
 
-    host_arch = ['Cortex-M3', 'Cortex-M4', 'Cortex-M4F', "ARM968E-S"]
+    host_arch = ['Cortex-M3', 'Cortex-M4', 'Cortex-M4F', "ARM968E-S", "Cortex-M0plus"]
     for arch in host_arch:
         _run_make(['LIB_DIR='+path, 'HOST_ARCH='+arch, '-f mico-os/makefiles/mico_library_makefile.mk'])
 
