@@ -18,7 +18,7 @@ LICENSE = open('LICENSE').read()
 
 setup(
     name="mico-cube",
-    version="1.0.11",
+    version="1.0.12",
     description="MXCHIP MiCO command line tool for repositories version control, publishing and updating code from remotely hosted repositories, and invoking MiCO OS own build system and export functions, among other operations",
     long_description=LONG_DESC,
     url='https://code.aliyun.com/mico/mico-cube',

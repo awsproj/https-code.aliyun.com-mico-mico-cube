@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.11'
+ver = '1.0.12'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
