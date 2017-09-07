@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.12'
+ver = '1.0.15'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -1685,7 +1685,7 @@ def subcommand(name, *args, **kwargs):
     dict(name='--scm', nargs='?', help='Source control management. Currently supported: %s. Default: git' % ', '.join([s.name for s in scms.values()])),
     dict(name='--program', action='store_true', help='Force creation of an mico program. Default: auto.'),
     dict(name='--component', action='store_true', help='Force creation of an mico component. Default: auto.'),
-    dict(name='--micolib', action='store_true', help='Add the mico component instead of mico-os into the program.'),
+    dict(name='--mirror', nargs='?', help='Mirrored mico-os repository url'),
     dict(name='--create-only', action='store_true', help='Only create a program, do not import mico-os or mico component.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch the mico OS repository when creating new program. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol when fetching the mico OS repository when creating new program. Supported: https, http, ssh, git. Default: inferred from URL.'),
@@ -1695,7 +1695,7 @@ def subcommand(name, *args, **kwargs):
         "Alternatively creates an mico component if executed within an existing program.\n"
         "When creating new program, the latest mico-os release will be downloaded/added\n unless --create-only is specified.\n"
         "Supported source control management: git, hg"))
-def new(name, scm='git', program=False, component=False, micolib=False, create_only=False, depth=None, protocol=None):
+def new(name, scm='git', program=False, component=False, mirror=None, create_only=False, depth=None, protocol=None):
     global cwd_root
 
     d_path = os.path.abspath(name or os.getcwd())
@@ -1745,8 +1745,8 @@ def new(name, scm='git', program=False, component=False, micolib=False, create_o
         p.path = cwd_root
         p.set_root()
         if not create_only and not p.get_os_dir() and not p.get_micolib_dir():
-            url = mico_lib_url if micolib else mico_os_url+'#latest'
-            d = 'mico' if micolib else 'mico-os'
+            url = mirror+'#latest' if mirror else mico_os_url+'#latest'
+            d = 'mico-os'
             try:
                 with cd(d_path):
                     add(url, depth=depth, protocol=protocol, top=False)
@@ -1794,6 +1794,7 @@ def new(name, scm='git', program=False, component=False, micolib=False, create_o
 @subcommand('import',
     dict(name='url', help='URL of the program'),
     dict(name='path', nargs='?', help='Destination name or path. Default: current directory.'),
+    dict(name='--mirror', nargs='?', help='Mirrored mico-os repository url'),
     dict(name=['-I', '--ignore'], action='store_true', help='Ignore errors related to cloning and updating.'),
     dict(name='--depth', nargs='?', help='Number of revisions to fetch from the remote repository. Default: all revisions.'),
     dict(name='--protocol', nargs='?', help='Transport protocol for the source control management. Supported: https, http, ssh, git. Default: inferred from URL.'),
@@ -1802,7 +1803,7 @@ def new(name, scm='git', program=False, component=False, micolib=False, create_o
         "Imports mico program and its dependencies from a source control based URL\n"
         "(GitHub, Bitbucket, mico.org) into the current directory or specified\npath.\n"
         "Use 'mico add <URL>' to add a component into an existing program."))
-def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
+def import_(url, path=None, mirror=None, ignore=False, depth=None, protocol=None, top=True):
     global cwd_root
 
     # translate 'mico-os' to https://code.aliyun.com/mico
@@ -1821,6 +1822,8 @@ def import_(url, path=None, ignore=False, depth=None, protocol=None, top=True):
     if os.path.isdir(repo.path) and len(os.listdir(repo.path)) > 1:
         error("Directory \"%s\" is not empty. Please ensure that the destination folder is empty." % repo.path, 1)
 
+    if repo.name == 'mico-os' and mirror:
+        repo.url = repo.url.replace(mico_os_url, mirror)
     text = "Importing program" if top else "Adding component"
     action("%s \"%s\" from \"%s\"%s" % (text, relpath(cwd_root, repo.path), formaturl(repo.url, protocol), ' at '+(repo.revtype(repo.rev, True))))
     if repo.clone(repo.url, repo.path, rev=repo.rev, depth=depth, protocol=protocol):
@@ -1971,7 +1974,6 @@ def codes(name, ignore=False, depth=None, protocol=None, top=True):
                 update(code.rev, ignore=ignore, depth=depth, protocol=protocol, top=False)
     else:
         import_(code.fullurl, code.path, ignore=ignore, depth=depth, protocol=protocol, top=False)
-        print '>>>>',repo.path,code.path
         repo.ignore(relpath(repo.path, code.path))
             
 
@@ -2545,11 +2547,28 @@ def make():
 # Make command
 @subcommand('makelib',
     dict(name='path', nargs='?', help='Library directory path.'),
+    dict(name='arch', nargs='?', help='CPU architecture.'),
     dict(name=['-N', '--new'], dest='new', action='store_true', help='Create a library configure makefile .'),
     help='Compile static library\n\n',
     description=(
         "Compile static library."))
-def makelib(path, new=False):
+def makelib(path, arch=None, new=False):
+    argv = list(sys.argv[2:])
+
+    if path in argv:
+        argv.remove(path)
+
+    if arch in argv:
+        argv.remove(arch)
+
+    if '-N' in argv:
+        argv.remove('-N')
+
+    if '--new' in argv:
+        argv.remove('--new')
+
+    make_args = ' '.join(argv)
+
     if new:
         root_dir = Program().path
         with open(os.path.join(root_dir,'mico-os/template/makefiles/mico_library_makefile/template.mk'), 'r') as f:
@@ -2558,9 +2577,14 @@ def makelib(path, new=False):
             f.write(content.replace('template', os.path.basename(path)))
         return
 
+    if arch:
+        _run_make(['LIB_DIR='+path, 'HOST_ARCH='+arch, '-f mico-os/makefiles/mico_library_makefile.mk', make_args])
+        return
+
     host_arch = ['Cortex-M3', 'Cortex-M4', 'Cortex-M4F', "ARM968E-S", "Cortex-M0plus"]
+
     for arch in host_arch:
-        _run_make(['LIB_DIR='+path, 'HOST_ARCH='+arch, '-f mico-os/makefiles/mico_library_makefile.mk'])
+        _run_make(['LIB_DIR='+path, 'HOST_ARCH='+arch, '-f mico-os/makefiles/mico_library_makefile.mk', make_args])
 
 # Generic config command
 @subcommand('config',
