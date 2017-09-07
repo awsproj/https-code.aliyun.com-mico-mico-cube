@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.16'
+ver = '1.0.17'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -1805,6 +1805,7 @@ mico_os_mirror = None
         "(GitHub, Bitbucket, mico.org) into the current directory or specified\npath.\n"
         "Use 'mico add <URL>' to add a component into an existing program."))
 def import_(url, path=None, mirror=None, ignore=False, depth=None, protocol=None, top=True):
+    global mico_os_mirror
     global cwd_root
 
     # translate 'mico-os' to https://code.aliyun.com/mico
