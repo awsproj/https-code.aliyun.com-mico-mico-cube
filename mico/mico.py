@@ -38,7 +38,7 @@ from distutils.version import LooseVersion
 
 
 # Application version
-ver = '1.0.15'
+ver = '1.0.16'
 
 # Default paths to Mercurial and Git
 hg_cmd = 'hg'
@@ -1789,6 +1789,7 @@ def new(name, scm='git', program=False, component=False, mirror=None, create_onl
     
 #    Program(d_path).post_action()
 
+mico_os_mirror = None
 
 # Import command
 @subcommand('import',
@@ -1822,8 +1823,8 @@ def import_(url, path=None, mirror=None, ignore=False, depth=None, protocol=None
     if os.path.isdir(repo.path) and len(os.listdir(repo.path)) > 1:
         error("Directory \"%s\" is not empty. Please ensure that the destination folder is empty." % repo.path, 1)
 
-    if repo.name == 'mico-os' and mirror:
-        repo.url = repo.url.replace(mico_os_url, mirror)
+    if repo.name == 'mico-os' and mico_os_mirror:
+        repo.url = repo.url.replace(mico_os_url, mico_os_mirror)
     text = "Importing program" if top else "Adding component"
     action("%s \"%s\" from \"%s\"%s" % (text, relpath(cwd_root, repo.path), formaturl(repo.url, protocol), ' at '+(repo.revtype(repo.rev, True))))
     if repo.clone(repo.url, repo.path, rev=repo.rev, depth=depth, protocol=protocol):
@@ -1852,6 +1853,7 @@ def import_(url, path=None, mirror=None, ignore=False, depth=None, protocol=None
 
         if top: # This helps sub-commands to display relative paths to the imported program
             cwd_root = repo.path
+            mico_os_mirror = mirror
 
         if repo.name == 'mico-os':
             target_dir = Program().path
